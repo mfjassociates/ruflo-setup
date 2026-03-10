@@ -1,0 +1,32 @@
+{
+  "name": "@mfjjs/ruflo-setup",
+  "version": "0.1.0",
+  "description": "Cross-platform setup CLI for Ruflo + Claude Flow projects",
+  "type": "module",
+  "bin": {
+    "ruflo-setup": "./bin/ruflo-setup.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "templates",
+    "claude-hooks"
+  ],
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "lint": "node --check ./src/cli.js && node --check ./src/setup.js && node --check ./src/hooks.js && node --check ./src/utils.js && node --check ./bin/ruflo-setup.js",
+    "test": "node --test tests/cli.test.mjs",
+    "test:cli": "node ./bin/ruflo-setup.js --dry-run --skip-init --no-hooks --yes",
+    "pack:dry": "pnpm pack --dry-run"
+  },
+  "keywords": [
+    "ruflo",
+    "claude-flow",
+    "cli",
+    "setup"
+  ],
+  "license": "MIT",
+  "packageManager": "pnpm@10.0.0"
+}
