@@ -1,4 +1,3 @@
-import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -45,33 +44,6 @@ function writeMcpJson({ cwd, dryRun }) {
   logLine('  .mcp.json written for this platform.');
 }
 
-async function copyTemplateClaude({ cwd, force, dryRun, templatePath, yes }) {
-  const destination = path.join(cwd, 'CLAUDE.md');
-
-  if (pathExists(destination) && !force && !dryRun && !yes) {
-    logLine('  WARNING: CLAUDE.md already exists.');
-    const shouldOverwrite = await confirm('  Overwrite with template? [y/N] ');
-    if (!shouldOverwrite) {
-      logLine('  Skipped CLAUDE.md (kept existing).');
-      return;
-    }
-  }
-
-  if (dryRun) {
-    if (pathExists(destination)) {
-      logLine(`  [DRY RUN] Would overwrite: ${destination}`);
-    } else {
-      logLine(`  [DRY RUN] Would copy CLAUDE.md to: ${destination}`);
-    }
-    return;
-  }
-
-  copyFileSync(templatePath, destination);
-  if (pathExists(destination)) {
-    logLine('  CLAUDE.md copied from template.');
-  }
-}
-
 function installGlobalCommand({ packageRoot, dryRun }) {
   const src = path.join(packageRoot, 'templates', 'ruflo-setup.md');
   const dest = path.join(os.homedir(), '.claude', 'commands', 'ruflo-setup.md');
@@ -99,12 +71,6 @@ export async function runSetup({
   yes = false,
   verbose = false
 }) {
-  const templateClaude = path.join(packageRoot, 'templates', 'CLAUDE.md');
-
-  if (!fs.existsSync(templateClaude)) {
-    throw new Error(`Template CLAUDE.md not found at: ${templateClaude}`);
-  }
-
   logLine('');
   logLine('Ruflo Setup (npm CLI)');
   logLine(`Target directory: ${cwd}`);
@@ -138,12 +104,8 @@ export async function runSetup({
   writeMcpJson({ cwd, dryRun });
   logLine('');
 
-  logLine('Step 3: Copying template CLAUDE.md ...');
-  await copyTemplateClaude({ cwd, force, dryRun, templatePath: templateClaude, yes });
-  logLine('');
-
   if (!noHooks) {
-    logLine('Step 4: Installing global SessionStart check-ruflo hook ...');
+    logLine('Step 3: Installing global SessionStart check-ruflo hook ...');
     const hookResult = installGlobalCheckRufloHook({ packageRoot, dryRun });
     if (hookResult.inserted) {
       logLine(`  Hook installed in: ${hookResult.settingsPath}`);
@@ -155,11 +117,11 @@ export async function runSetup({
     }
     logLine('');
   } else {
-    logLine('Step 4: Skipped hook installation (--no-hooks).');
+    logLine('Step 3: Skipped hook installation (--no-hooks).');
     logLine('');
   }
 
-  logLine('Step 5: Installing global /ruflo-setup command ...');
+  logLine('Step 4: Installing global /ruflo-setup command ...');
   const commandResult = installGlobalCommand({ packageRoot, dryRun });
   if (!dryRun) {
     logLine(`  Command installed at: ${commandResult.dest}`);

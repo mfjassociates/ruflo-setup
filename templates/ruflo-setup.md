@@ -13,8 +13,7 @@ Runs `npx @mfjjs/ruflo-setup` which:
    - `.claude/skills/` — 30+ skill definitions
    - `.claude/commands/` — slash commands
 2. Writes a platform-aware `.mcp.json` (MCP server registration for claude-flow, ruv-swarm, flow-nexus)
-3. Copies a template `CLAUDE.md` for the project
-4. Installs a global `SessionStart` hook in `~/.claude/settings.json` that warns when Ruflo is not configured
+3. Installs a global `SessionStart` hook in `~/.claude/settings.json` that warns when Ruflo is not configured
 
 ## Instructions for Claude
 
