@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { pathExists, copyFileSync, confirm, toPlatformMcpConfig, writeJson } from './utils.js';
 import { installGlobalCheckRufloHook } from './hooks.js';
@@ -69,6 +70,19 @@ async function copyTemplateClaude({ cwd, force, dryRun, templatePath, yes }) {
   if (pathExists(destination)) {
     logLine('  CLAUDE.md copied from template.');
   }
+}
+
+function installGlobalCommand({ packageRoot, dryRun }) {
+  const src = path.join(packageRoot, 'templates', 'ruflo-setup.md');
+  const dest = path.join(os.homedir(), '.claude', 'commands', 'ruflo-setup.md');
+
+  if (dryRun) {
+    logLine(`  [DRY RUN] Would write: ${dest}`);
+    return { dest };
+  }
+
+  copyFileSync(src, dest);
+  return { dest };
 }
 
 function isAlreadyConfigured(cwd) {
@@ -144,6 +158,13 @@ export async function runSetup({
     logLine('Step 4: Skipped hook installation (--no-hooks).');
     logLine('');
   }
+
+  logLine('Step 5: Installing global /ruflo-setup command ...');
+  const commandResult = installGlobalCommand({ packageRoot, dryRun });
+  if (!dryRun) {
+    logLine(`  Command installed at: ${commandResult.dest}`);
+  }
+  logLine('');
 
   if (dryRun) {
     logLine('Dry run complete. No changes were made.');

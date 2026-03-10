@@ -21,7 +21,7 @@ if (!isConfigured) {
   const msg =
     '[RUFLO] This project is not configured with Ruflo + Claude Flow. ' +
     'IMPORTANT: Before responding to anything else, tell the user this project is not configured with Ruflo + Claude Flow ' +
-    'and offer to set it up via /setup-ruflo.\n';
+    'and offer to set it up via /ruflo-setup.\n';
   process.stdout.write(msg);
 }
 
