@@ -92,7 +92,7 @@ export async function runSetup({
   }
 
   logLine('');
-  logLine('Ruflo + Claude Flow V3 Setup (npm CLI)');
+  logLine('Ruflo Setup (npm CLI)');
   logLine(`Target directory: ${cwd}`);
   if (dryRun) {
     logLine('[DRY RUN - no changes will be made]');
@@ -100,7 +100,7 @@ export async function runSetup({
   logLine('');
 
   if (isAlreadyConfigured(cwd) && !force && !yes) {
-    logLine('WARNING: This project already has Ruflo/Claude Flow configuration.');
+    logLine('WARNING: This project already has Ruflo configuration.');
     const shouldOverwrite = await confirm('Overwrite existing configuration? [y/N] ');
     if (!shouldOverwrite) {
       logLine('Aborted. No changes made.');
