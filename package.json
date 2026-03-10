@@ -10,6 +10,7 @@
     "bin",
     "src",
     "templates",
+    "CHANGELOG.md",
     "claude-hooks"
   ],
   "engines": {
@@ -19,7 +20,7 @@
     "lint": "node --check ./src/cli.js && node --check ./src/setup.js && node --check ./src/hooks.js && node --check ./src/utils.js && node --check ./bin/ruflo-setup.js",
     "test": "node --test tests/cli.test.mjs",
     "test:cli": "node ./bin/ruflo-setup.js --dry-run --skip-init --no-hooks --yes",
-    "pack:dry": "pnpm pack --dry-run"
+    "pack:dry": "pnpm pack --json"
   },
   "keywords": [
     "ruflo",
