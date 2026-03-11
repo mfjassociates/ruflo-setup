@@ -8,6 +8,56 @@ function logLine(message) {
   process.stdout.write(`${message}\n`);
 }
 
+function getPnpmInstallSuggestions(platform) {
+  if (platform === 'win32') {
+    return [
+      'winget install -e --id pnpm.pnpm',
+      'corepack enable && corepack prepare pnpm@latest --activate',
+      'npm install -g pnpm'
+    ];
+  }
+
+  if (platform === 'darwin') {
+    return [
+      'brew install pnpm',
+      'corepack enable && corepack prepare pnpm@latest --activate',
+      'npm install -g pnpm'
+    ];
+  }
+
+  return [
+    'curl -fsSL https://get.pnpm.io/install.sh | sh -',
+    'corepack enable && corepack prepare pnpm@latest --activate',
+    'npm install -g pnpm'
+  ];
+}
+
+function ensurePnpmAvailable() {
+  const check = spawnSync('pnpm', ['--version'], {
+    stdio: 'ignore',
+    shell: process.platform === 'win32'
+  });
+
+  if (check.status === 0 && !check.error) {
+    return;
+  }
+
+  const platformLabel = process.platform === 'win32'
+    ? 'Windows'
+    : process.platform === 'darwin'
+      ? 'macOS'
+      : 'Linux';
+  const suggestions = getPnpmInstallSuggestions(process.platform)
+    .map((command) => `  - ${command}`)
+    .join('\n');
+
+  throw new Error(
+    `pnpm is required but was not found in PATH.\n` +
+    `Install pnpm, then re-run ruflo-setup.\n` +
+    `Quick install options for ${platformLabel}:\n${suggestions}`
+  );
+}
+
 function runPnpmInit({ force, cwd, dryRun }) {
   const initArgs = ['init', '--full'];
   if (force) {
@@ -19,6 +69,8 @@ function runPnpmInit({ force, cwd, dryRun }) {
     logLine(`  [DRY RUN] Would run: ruflo ${initArgs.join(' ')}`);
     return;
   }
+
+  ensurePnpmAvailable();
 
   const install = spawnSync('pnpm', ['add', '-g', 'ruflo@latest'], {
     cwd,

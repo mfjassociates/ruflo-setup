@@ -10,6 +10,31 @@ Cross-platform npm CLI to bootstrap a project with Ruflo on Windows and Linux.
 - Command name: `ruflo-setup`
 - Platform support: Windows and Linux (plus macOS by default)
 
+## Requirements
+
+- Node.js 20+
+- pnpm available on PATH
+
+Quickest pnpm install by platform:
+
+```bash
+# Windows (recommended)
+winget install -e --id pnpm.pnpm
+
+# macOS (recommended)
+brew install pnpm
+
+# Linux (recommended)
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
+
+Alternative (all platforms with recent Node.js):
+
+```bash
+corepack enable
+corepack prepare pnpm@latest --activate
+```
+
 ## Project structure
 
 - `package.json`: npm metadata, scripts, and `bin` mapping

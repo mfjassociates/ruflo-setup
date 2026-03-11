@@ -2,6 +2,31 @@
 
 Set up Ruflo + Claude Flow V3 in the current project directory.
 
+## Requirements
+
+- Node.js 20+
+- pnpm installed and available on PATH
+
+Quickest pnpm install by platform:
+
+```bash
+# Windows (recommended)
+winget install -e --id pnpm.pnpm
+
+# macOS (recommended)
+brew install pnpm
+
+# Linux (recommended)
+curl -fsSL https://get.pnpm.io/install.sh | sh -
+```
+
+Alternative (all platforms with recent Node.js):
+
+```bash
+corepack enable
+corepack prepare pnpm@latest --activate
+```
+
 ## What this does
 
 Runs `pnpm add -g @mfjjs/ruflo-setup` then `ruflo-setup` which:
