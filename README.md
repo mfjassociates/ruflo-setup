@@ -4,7 +4,7 @@ Cross-platform npm CLI to bootstrap a project with Ruflo on Windows and Linux.
 
 ## What this project is
 
-`@mfjjs/ruflo-setup` replaces the old PowerShell-only bootstrap script with a Node-based CLI command:
+`@mfjjs/ruflo-setup` implements the setup with a Node-based CLI command:
 
 - Package name: `@mfjjs/ruflo-setup`
 - Command name: `ruflo-setup`
