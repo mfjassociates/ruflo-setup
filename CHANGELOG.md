@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.4](https://gitlab.mfj.local:8022/mario/ruflo-setup/compare/v0.1.3...v0.1.4) (2026-03-11)
+
+
+### Features
+
+* **hooks:** enhance hook status reporting with matched command and source info ([faca4f7](https://gitlab.mfj.local:8022/mario/ruflo-setup/commit/faca4f77a26581a2262548753fb15ca8ee9d4773))
+
 ### [0.1.3](https://gitlab.mfj.local:8022/mario/setup-ruflo/compare/v0.1.2...v0.1.3) (2026-03-11)
 
 
