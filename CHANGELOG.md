@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://gitlab.mfj.local:8022/mario/setup-ruflo/compare/v0.1.1...v0.1.2) (2026-03-11)
+
+
+### Features
+
+* **cli:** add version printing functionality and update help options ([ffff66b](https://gitlab.mfj.local:8022/mario/setup-ruflo/commit/ffff66b5503016600724608ec179e06e9ecccaa0))
+
+
+### Bug Fixes
+
+* **package:** update pack:dry script to use JSON output and add changelog.md ([d6a675e](https://gitlab.mfj.local:8022/mario/setup-ruflo/commit/d6a675eb8b901566079f647b9d4d6e805474712c))
+
 ### 0.1.1 (2026-03-10)
 
 
