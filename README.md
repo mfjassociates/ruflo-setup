@@ -45,7 +45,7 @@ Flow:
 3. `bin/ruflo-setup.js` forwards args to `runCli(...)`.
 4. `src/cli.js` parses command and flags.
 5. `src/setup.js` runs setup steps:
-	 - optional `npx ruflo@latest init --full`
+	 - optional `pnpm add -g ruflo@latest` then `ruflo init --full`
 	 - writes platform-aware `.mcp.json`
 	 - copies `templates/CLAUDE.md`
 	 - installs global SessionStart hook (unless skipped)
@@ -114,7 +114,3 @@ This tests exactly what users get from a package install.
 - `claude-hooks/check-ruflo.cjs`
 
 It merges into existing global settings instead of replacing them, and creates a backup of the settings file before writing.
-
-## Legacy note
-
-`setup-ruflo.ps1` remains in the repository as historical reference, but the npm CLI is now the primary path.

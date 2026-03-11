@@ -8,25 +8,36 @@ function logLine(message) {
   process.stdout.write(`${message}\n`);
 }
 
-function runNpxInit({ force, cwd, dryRun }) {
-  const args = ['ruflo@latest', 'init', '--full'];
+function runPnpmInit({ force, cwd, dryRun }) {
+  const initArgs = ['init', '--full'];
   if (force) {
-    args.push('--force');
+    initArgs.push('--force');
   }
 
   if (dryRun) {
-    logLine(`  [DRY RUN] Would run: npx ${args.join(' ')}`);
+    logLine(`  [DRY RUN] Would run: pnpm add -g ruflo@latest`);
+    logLine(`  [DRY RUN] Would run: ruflo ${initArgs.join(' ')}`);
     return;
   }
 
-  const result = spawnSync('npx', args, {
+  const install = spawnSync('pnpm', ['add', '-g', 'ruflo@latest'], {
     cwd,
     stdio: 'inherit',
     shell: process.platform === 'win32'
   });
 
-  if (result.status !== 0) {
-    throw new Error(`ruflo init failed with exit code ${result.status}`);
+  if (install.status !== 0) {
+    throw new Error(`pnpm add -g ruflo@latest failed with exit code ${install.status}`);
+  }
+
+  const run = spawnSync('ruflo', initArgs, {
+    cwd,
+    stdio: 'inherit',
+    shell: process.platform === 'win32'
+  });
+
+  if (run.status !== 0) {
+    throw new Error(`ruflo init failed with exit code ${run.status}`);
   }
 }
 
@@ -89,8 +100,8 @@ export async function runSetup({
   }
 
   if (!skipInit) {
-    logLine('Step 1: Running npx ruflo@latest init --full ...');
-    runNpxInit({ force, cwd, dryRun });
+    logLine('Step 1: Running pnpm add -g ruflo@latest && ruflo init --full ...');
+    runPnpmInit({ force, cwd, dryRun });
     if (!dryRun) {
       logLine('  ruflo init completed.');
     }

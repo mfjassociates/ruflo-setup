@@ -4,9 +4,9 @@ Set up Ruflo + Claude Flow V3 in the current project directory.
 
 ## What this does
 
-Runs `npx @mfjjs/ruflo-setup` which:
+Runs `pnpm add -g @mfjjs/ruflo-setup` then `ruflo-setup` which:
 
-1. Runs `npx ruflo@latest init --full` to install:
+1. Runs `pnpm add -g ruflo@latest` then `ruflo init --full` to install:
    - `.claude/settings.json` with hooks, permissions, and Claude Flow config
    - `.claude/helpers/` — hook-handler, statusline, auto-memory scripts
    - `.claude/agents/` — 120+ agent definitions
@@ -23,6 +23,7 @@ When the user runs /ruflo-setup:
 2. Check if `.mcp.json` already exists — if so, warn and ask before overwriting
 3. Run the setup CLI:
    ```bash
-   npx @mfjjs/ruflo-setup
+   pnpm add -g @mfjjs/ruflo-setup
+   ruflo-setup
    ```
 4. Report what was installed and remind the user to restart Claude Code to load the new MCP servers

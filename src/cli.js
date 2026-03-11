@@ -26,7 +26,7 @@ Options:
   --dry-run        Show actions without making changes
   --yes, -y        Non-interactive yes for prompts
   --no-hooks       Skip global hook installation during setup
-  --skip-init      Skip 'npx ruflo@latest init --full'
+  --skip-init      Skip 'pnpm add -g ruflo@latest && ruflo init --full'
   --version, -v    Print version and exit
   --verbose        Extra output
 

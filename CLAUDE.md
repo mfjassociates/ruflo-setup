@@ -61,7 +61,7 @@ npm run lint
 - NEVER commit .env files or any file containing secrets
 - Always validate user input at system boundaries
 - Always sanitize file paths to prevent directory traversal
-- Run `npx ruflo@latest security scan` after security-related changes
+- Run `ruflo security scan` after security-related changes
 
 ## Concurrency: 1 MESSAGE = ALL RELATED OPERATIONS
 
@@ -100,7 +100,7 @@ npm run lint
 - Keep shared memory namespace for all agents
 
 ```bash
-npx ruflo@latest swarm init --topology hierarchical --max-agents 8 --strategy specialized
+ruflo swarm init --topology hierarchical --max-agents 8 --strategy specialized
 ```
 
 ## Swarm Execution Rules
@@ -129,11 +129,11 @@ npx ruflo@latest swarm init --topology hierarchical --max-agents 8 --strategy sp
 ### Quick CLI Examples
 
 ```bash
-npx ruflo@latest init --wizard
-npx ruflo@latest agent spawn -t coder --name my-coder
-npx ruflo@latest swarm init --v3-mode
-npx ruflo@latest memory search --query "authentication patterns"
-npx ruflo@latest doctor --fix
+ruflo init --wizard
+ruflo agent spawn -t coder --name my-coder
+ruflo swarm init --v3-mode
+ruflo memory search --query "authentication patterns"
+ruflo doctor --fix
 ```
 
 ## Available Agents (60+ Types)
@@ -157,24 +157,24 @@ npx ruflo@latest doctor --fix
 
 ```bash
 # Store (REQUIRED: --key, --value; OPTIONAL: --namespace, --ttl, --tags)
-npx ruflo@latest memory store --key "pattern-auth" --value "JWT with refresh" --namespace patterns
+ruflo memory store --key "pattern-auth" --value "JWT with refresh" --namespace patterns
 
 # Search (REQUIRED: --query; OPTIONAL: --namespace, --limit, --threshold)
-npx ruflo@latest memory search --query "authentication patterns"
+ruflo memory search --query "authentication patterns"
 
 # List (OPTIONAL: --namespace, --limit)
-npx ruflo@latest memory list --namespace patterns --limit 10
+ruflo memory list --namespace patterns --limit 10
 
 # Retrieve (REQUIRED: --key; OPTIONAL: --namespace)
-npx ruflo@latest memory retrieve --key "pattern-auth" --namespace patterns
+ruflo memory retrieve --key "pattern-auth" --namespace patterns
 ```
 
 ## Quick Setup
 
 ```bash
-npx ruflo@latest init --full
-npx ruflo@latest daemon start
-npx ruflo@latest doctor --fix
+ruflo init --full
+ruflo daemon start
+ruflo doctor --fix
 ```
 
 ## Claude Code vs CLI Tools
