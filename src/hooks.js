@@ -27,16 +27,19 @@ function ensureSessionStartHook(settings, hookCommand) {
     firstGroup.hooks = [];
   }
 
-  const alreadyExists = firstGroup.hooks.some((h) => h && h.type === 'command' && h.command === hookCommand);
-  if (!alreadyExists) {
-    firstGroup.hooks.unshift({
-      type: 'command',
-      command: hookCommand,
-      timeout: 5000
-    });
+  const newHook = { type: 'command', command: hookCommand, timeout: 5000 };
+  const existingIndex = firstGroup.hooks.findIndex(
+    (h) => h && h.type === 'command' && typeof h.command === 'string' && h.command.includes('check-ruflo.cjs')
+  );
+
+  if (existingIndex !== -1) {
+    const unchanged = firstGroup.hooks[existingIndex].command === hookCommand;
+    firstGroup.hooks[existingIndex] = newHook;
+    return unchanged ? false : true;
   }
 
-  return !alreadyExists;
+  firstGroup.hooks.unshift(newHook);
+  return true;
 }
 
 export function installGlobalCheckRufloHook({
@@ -95,7 +98,7 @@ export function getGlobalHookStatus({ packageRoot, globalSettingsPath }) {
     };
   }
 
-  const found = sessionStart.some((group) => Array.isArray(group?.hooks) && group.hooks.some((hook) => hook?.type === 'command' && hook?.command === hookCommand));
+  const found = sessionStart.some((group) => Array.isArray(group?.hooks) && group.hooks.some((hook) => hook?.type === 'command' && typeof hook?.command === 'string' && hook.command.includes('check-ruflo.cjs')));
 
   return {
     installed: found,
