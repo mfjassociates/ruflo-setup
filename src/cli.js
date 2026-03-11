@@ -1,8 +1,16 @@
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { createRequire } from 'node:module';
 import { parseArgs } from './utils.js';
 import { runSetup } from './setup.js';
 import { getGlobalHookStatus, installGlobalCheckRufloHook } from './hooks.js';
+
+const require = createRequire(import.meta.url);
+
+function printVersion() {
+  const { version } = require('../package.json');
+  process.stdout.write(`${version}\n`);
+}
 
 function printHelp() {
   process.stdout.write(`
@@ -19,7 +27,8 @@ Options:
   --yes, -y        Non-interactive yes for prompts
   --no-hooks       Skip global hook installation during setup
   --skip-init      Skip 'npx ruflo@latest init --full'
-  --verbose, -v    Extra output
+  --version, -v    Print version and exit
+  --verbose        Extra output
 
 Examples:
   ruflo-setup
@@ -36,6 +45,11 @@ function packageRootFromModule() {
 
 export async function runCli(argv, cwd) {
   try {
+    if (argv.includes('--version') || argv.includes('-v')) {
+      printVersion();
+      return 0;
+    }
+
     if (argv.includes('--help') || argv.includes('-h')) {
       printHelp();
       return 0;

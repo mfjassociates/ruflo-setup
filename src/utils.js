@@ -59,7 +59,7 @@ export function parseArgs(argv) {
     else if (item === '--yes' || item === '-y') flags.yes = true;
     else if (item === '--no-hooks') flags.noHooks = true;
     else if (item === '--skip-init') flags.skipInit = true;
-    else if (item === '--verbose' || item === '-v') flags.verbose = true;
+    else if (item === '--verbose') flags.verbose = true;
     else positional.push(item);
   }
 
