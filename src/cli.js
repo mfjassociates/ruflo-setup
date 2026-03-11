@@ -63,9 +63,14 @@ export async function runCli(argv, cwd) {
       if (subcommand === 'status') {
         const status = getGlobalHookStatus({ packageRoot });
         process.stdout.write(`Hook installed: ${status.installed ? 'yes' : 'no'}\n`);
+        if (status.matchedHookPointingTo) {
+          process.stdout.write(`${status.matchedHookPointingTo}\n`);
+        }
         process.stdout.write(`Settings path: ${status.settingsPath}\n`);
         process.stdout.write(`Reason: ${status.reason}\n`);
-        process.stdout.write(`Command: ${status.hookCommand}\n`);
+        if (status.matchedHookCommand) {
+          process.stdout.write(`Matched command: ${status.matchedHookCommand}\n`);
+        }
         return status.installed ? 0 : 1;
       }
 

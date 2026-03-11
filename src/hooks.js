@@ -3,8 +3,94 @@ import path from 'node:path';
 import os from 'node:os';
 import { readJsonSafe, writeJson } from './utils.js';
 
+const CHECK_RUFLO_HOOK_FILENAME = 'check-ruflo.cjs';
+
 function defaultGlobalClaudeSettingsPath() {
   return path.join(os.homedir(), '.claude', 'settings.json');
+}
+
+function hasCheckRufloHookFilename(command) {
+  if (typeof command !== 'string') return false;
+  return /check-ruflo\.cjs(?=["'\s]|$)/i.test(command);
+}
+
+function extractHookScriptPath(command) {
+  if (typeof command !== 'string') return null;
+  const quoted = command.match(/["']([^"']*check-ruflo\.cjs)["']/i);
+  if (quoted) return quoted[1];
+  const bare = command.match(/([^\s"']*check-ruflo\.cjs)/i);
+  return bare ? bare[1] : null;
+}
+
+function inferHookSourceInfo(command, packageRoot) {
+  const scriptPath = extractHookScriptPath(command);
+  const normalizedScriptPath = scriptPath ? scriptPath.replace(/\\/g, '/').toLowerCase() : '';
+  const normalizedPath = scriptPath ? scriptPath.replace(/\\/g, '/') : '';
+  const normalizedPackageRoot = packageRoot ? packageRoot.replace(/\\/g, '/').toLowerCase() : '';
+
+  let source = 'unknown';
+  let packageRef = null;
+  let storeType = null;
+
+  if (normalizedScriptPath.includes('/_npx/')) {
+    source = 'npm/npx cache install';
+    storeType = 'npm/npx cache';
+    const m = normalizedPath.match(/_npx\/[^/]+\/node_modules\/((?:@[^/]+\/)?[^/]+)\/claude-hooks/i);
+    if (m) packageRef = m[1];
+  } else if (normalizedScriptPath.includes('/.pnpm/')) {
+    source = 'pnpm store install';
+    // scoped package: @scope+pkg@version
+    const pnpmScoped = normalizedPath.match(/\/\.pnpm\/((@[^/+]+)\+([^/@]+)@([^/]+))\//i);
+    if (pnpmScoped) {
+      packageRef = `${pnpmScoped[2]}/${pnpmScoped[3]}@${pnpmScoped[4]}`;
+    } else {
+      // unscoped: pkg@version
+      const pnpmUnscoped = normalizedPath.match(/\/\.pnpm\/([^/@+]+)@([^/]+)\//i);
+      if (pnpmUnscoped) packageRef = `${pnpmUnscoped[1]}@${pnpmUnscoped[2]}`;
+    }
+    storeType = normalizedScriptPath.includes('/pnpm/global/') ? 'pnpm global store' : 'pnpm store';
+  } else if (normalizedScriptPath.includes('/node_modules/')) {
+    source = 'node_modules install';
+    storeType = 'npm global';
+    const m = normalizedPath.match(/node_modules\/((?:@[^/]+\/)?[^/]+)\/claude-hooks/i);
+    if (m) packageRef = m[1];
+  }
+
+  const isCurrentPackagePath = Boolean(
+    normalizedScriptPath && normalizedPackageRoot && normalizedScriptPath.startsWith(normalizedPackageRoot)
+  );
+
+  const versionMatch = command.match(/@mfjjs[+/\\]ruflo-setup@(\d+\.\d+\.\d+(?:[-+][^\\/"'\s]+)?)/i);
+
+  const pointingTo = packageRef && storeType
+    ? `hook pointing to ${packageRef} from ${storeType}`
+    : packageRef
+      ? `hook pointing to ${packageRef}`
+      : null;
+
+  return {
+    scriptPath,
+    source,
+    isCurrentPackagePath,
+    inferredVersion: versionMatch ? versionMatch[1] : null,
+    packageRef,
+    pointingTo
+  };
+}
+
+function findCheckRufloHook(sessionStart) {
+  if (!Array.isArray(sessionStart)) return null;
+  for (let gi = 0; gi < sessionStart.length; gi += 1) {
+    const group = sessionStart[gi];
+    if (!Array.isArray(group?.hooks)) continue;
+    for (let hi = 0; hi < group.hooks.length; hi += 1) {
+      const hook = group.hooks[hi];
+      if (hasCheckRufloHookFilename(hook?.command)) {
+        return { hook, groupIndex: gi, hookIndex: hi, command: hook.command };
+      }
+    }
+  }
+  return null;
 }
 
 function ensureSessionStartHook(settings, hookCommand) {
@@ -28,9 +114,7 @@ function ensureSessionStartHook(settings, hookCommand) {
   }
 
   const newHook = { type: 'command', command: hookCommand, timeout: 5000 };
-  const existingIndex = firstGroup.hooks.findIndex(
-    (h) => h && h.type === 'command' && typeof h.command === 'string' && h.command.includes('check-ruflo.cjs')
-  );
+  const existingIndex = firstGroup.hooks.findIndex((h) => hasCheckRufloHookFilename(h?.command));
 
   if (existingIndex !== -1) {
     const unchanged = firstGroup.hooks[existingIndex].command === hookCommand;
@@ -98,12 +182,17 @@ export function getGlobalHookStatus({ packageRoot, globalSettingsPath }) {
     };
   }
 
-  const found = sessionStart.some((group) => Array.isArray(group?.hooks) && group.hooks.some((hook) => hook?.type === 'command' && typeof hook?.command === 'string' && hook.command.includes('check-ruflo.cjs')));
+  const foundHook = findCheckRufloHook(sessionStart);
+  const found = Boolean(foundHook);
+  const sourceInfo = foundHook ? inferHookSourceInfo(foundHook.command, packageRoot) : null;
 
   return {
     installed: found,
-    reason: found ? 'hook found' : 'hook command not found in SessionStart hooks',
+    reason: found ? `hook found by filename ${CHECK_RUFLO_HOOK_FILENAME}` : `hook command with filename ${CHECK_RUFLO_HOOK_FILENAME} not found in SessionStart hooks`,
     settingsPath: resolvedSettingsPath,
-    hookCommand
+    hookCommand,
+    matchedHookCommand: foundHook?.command || null,
+    matchedHookSource: sourceInfo?.source || null,
+    matchedHookPointingTo: sourceInfo?.pointingTo || null
   };
 }
