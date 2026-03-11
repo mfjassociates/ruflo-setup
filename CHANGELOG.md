@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.5](https://gitlab.mfj.local:8022/mario/ruflo-setup/compare/v0.1.4...v0.1.5) (2026-03-11)
+
+
+### Features
+
+* **cli:** update commands to use pnpm instead of npx for installation and initialization ([5d7e482](https://gitlab.mfj.local:8022/mario/ruflo-setup/commit/5d7e482beaae9b3adfdf2a4c6ea478e8cf6774cb))
+* **setup:** enhance pnpm installation instructions and ensure availability checks ([b89cccc](https://gitlab.mfj.local:8022/mario/ruflo-setup/commit/b89cccc978b7e439c6544195c7d480bb95ef07af))
+
 ### [0.1.4](https://gitlab.mfj.local:8022/mario/ruflo-setup/compare/v0.1.3...v0.1.4) (2026-03-11)
 
 
