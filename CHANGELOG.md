@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://gitlab.mfj.local:8022/mario/setup-ruflo/compare/v0.1.2...v0.1.3) (2026-03-11)
+
+
+### Bug Fixes
+
+* **hooks:** update session start hook logic to prevent duplicate commands ([f81388e](https://gitlab.mfj.local:8022/mario/setup-ruflo/commit/f81388e46c4c91d72018e68365c4cc4c9831e778))
+
 ### [0.1.2](https://gitlab.mfj.local:8022/mario/setup-ruflo/compare/v0.1.1...v0.1.2) (2026-03-11)
 
 
