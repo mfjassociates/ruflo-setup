@@ -2,6 +2,8 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.8](https://gitlab.mfj.local:8022/mario/ruflo-setup/compare/v0.1.7...v0.1.8) (2026-03-13)
+
 ### [0.1.7](https://gitlab.mfj.local:8022/mario/ruflo-setup/compare/v0.1.6...v0.1.7) (2026-03-13)
 
 
