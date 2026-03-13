@@ -39,6 +39,7 @@ Runs `pnpm add -g @mfjjs/ruflo-setup` then `ruflo-setup` which:
    - `.claude/commands/` — slash commands
 2. Writes a platform-aware `.mcp.json` (MCP server registration for claude-flow, ruv-swarm, flow-nexus)
 3. Installs a global `SessionStart` hook in `~/.claude/settings.json` that warns when Ruflo is not configured
+4. May refresh `~/.claude/commands/ruflo-setup.md` from the latest packaged template when differences are detected
 
 ## Instructions for Claude
 

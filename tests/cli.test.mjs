@@ -13,6 +13,24 @@ async function captureStdout(fn) {
   finally { process.stdout.write = orig; }
 }
 
+async function withTempHome(fn) {
+  const prevHome = process.env.HOME;
+  const prevUserProfile = process.env.USERPROFILE;
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-home-'));
+  const fakeHome = path.join(tempDir, 'home');
+  fs.mkdirSync(fakeHome, { recursive: true });
+  process.env.HOME = fakeHome;
+  process.env.USERPROFILE = fakeHome;
+  try {
+    return await fn(fakeHome);
+  } finally {
+    if (typeof prevHome === 'undefined') delete process.env.HOME;
+    else process.env.HOME = prevHome;
+    if (typeof prevUserProfile === 'undefined') delete process.env.USERPROFILE;
+    else process.env.USERPROFILE = prevUserProfile;
+  }
+}
+
 test('hooks status returns 0 when hook is installed', async () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
   const fakeHome = path.join(tempDir, 'home');
@@ -69,4 +87,47 @@ test('hooks status shows pointing-to line for npm npx cache', async () => {
   assert.equal(code, 0);
   assert.match(output, /Hook installed: yes/);
   assert.match(output, /hook pointing to @mfjjs\/ruflo-setup from npm\/npx cache/);
+});
+
+test('setup dry-run reports command template install for missing global command', async () => {
+  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  await withTempHome(async () => {
+    const { code, output } = await captureStdout(() => runCli(['--dry-run', '--skip-init', '--no-hooks', '--yes'], projectDir));
+    assert.equal(code, 0);
+    assert.match(output, /\[DRY RUN\] Would install:/);
+  });
+});
+
+test('setup updates stale global command template', async () => {
+  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  const templatePath = path.join(process.cwd(), 'templates', 'ruflo-setup.md');
+  const templateContent = fs.readFileSync(templatePath, 'utf8');
+
+  await withTempHome(async (fakeHome) => {
+    const commandPath = path.join(fakeHome, '.claude', 'commands', 'ruflo-setup.md');
+    fs.mkdirSync(path.dirname(commandPath), { recursive: true });
+    fs.writeFileSync(commandPath, '# stale\n', 'utf8');
+
+    const { code, output } = await captureStdout(() => runCli(['--skip-init', '--no-hooks', '--yes'], projectDir));
+    assert.equal(code, 0);
+    assert.match(output, /Updated command template at:/);
+    assert.equal(fs.readFileSync(commandPath, 'utf8'), templateContent);
+  });
+});
+
+test('setup keeps global command template unchanged when already current', async () => {
+  const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  const templatePath = path.join(process.cwd(), 'templates', 'ruflo-setup.md');
+  const templateContent = fs.readFileSync(templatePath, 'utf8');
+
+  await withTempHome(async (fakeHome) => {
+    const commandPath = path.join(fakeHome, '.claude', 'commands', 'ruflo-setup.md');
+    fs.mkdirSync(path.dirname(commandPath), { recursive: true });
+    fs.writeFileSync(commandPath, templateContent, 'utf8');
+
+    const { code, output } = await captureStdout(() => runCli(['--skip-init', '--no-hooks', '--yes'], projectDir));
+    assert.equal(code, 0);
+    assert.match(output, /Command template already up to date:/);
+    assert.equal(fs.readFileSync(commandPath, 'utf8'), templateContent);
+  });
 });

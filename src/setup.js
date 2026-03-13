@@ -1,3 +1,4 @@
+import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
@@ -107,17 +108,20 @@ function writeMcpJson({ cwd, dryRun }) {
   logLine('  .mcp.json written for this platform.');
 }
 
-function installGlobalCommand({ packageRoot, dryRun }) {
+function syncGlobalCommandTemplate({ packageRoot, dryRun }) {
   const src = path.join(packageRoot, 'templates', 'ruflo-setup.md');
   const dest = path.join(os.homedir(), '.claude', 'commands', 'ruflo-setup.md');
+  const exists = pathExists(dest);
+  const operation = exists ? 'update' : 'install';
+  const srcContent = fs.readFileSync(src, 'utf8');
+  const changed = !exists || fs.readFileSync(dest, 'utf8') !== srcContent;
 
-  if (dryRun) {
-    logLine(`  [DRY RUN] Would write: ${dest}`);
-    return { dest };
+  if (dryRun || !changed) {
+    return { dest, changed, operation };
   }
 
   copyFileSync(src, dest);
-  return { dest };
+  return { dest, changed, operation };
 }
 
 function isAlreadyConfigured(cwd) {
@@ -139,6 +143,21 @@ export async function runSetup({
   logLine(`Target directory: ${cwd}`);
   if (dryRun) {
     logLine('[DRY RUN - no changes will be made]');
+  }
+  logLine('');
+
+  logLine('Preflight: Syncing global /ruflo-setup command template ...');
+  const preflightCommandResult = syncGlobalCommandTemplate({ packageRoot, dryRun });
+  if (preflightCommandResult.changed) {
+    if (dryRun) {
+      logLine(`  [DRY RUN] Would ${preflightCommandResult.operation}: ${preflightCommandResult.dest}`);
+    } else if (preflightCommandResult.operation === 'install') {
+      logLine(`  Installed command template at: ${preflightCommandResult.dest}`);
+    } else {
+      logLine(`  Updated command template at: ${preflightCommandResult.dest}`);
+    }
+  } else {
+    logLine(`  Command template already up to date: ${preflightCommandResult.dest}`);
   }
   logLine('');
 
@@ -185,9 +204,20 @@ export async function runSetup({
   }
 
   logLine('Step 4: Installing global /ruflo-setup command ...');
-  const commandResult = installGlobalCommand({ packageRoot, dryRun });
-  if (!dryRun) {
-    logLine(`  Command installed at: ${commandResult.dest}`);
+  if (dryRun) {
+    if (preflightCommandResult.changed) {
+      logLine(`  [DRY RUN] Would ${preflightCommandResult.operation}: ${preflightCommandResult.dest}`);
+    } else {
+      logLine(`  [DRY RUN] Command already up to date: ${preflightCommandResult.dest}`);
+    }
+  } else if (preflightCommandResult.changed) {
+    if (preflightCommandResult.operation === 'install') {
+      logLine(`  Command installed at: ${preflightCommandResult.dest}`);
+    } else {
+      logLine(`  Command updated at: ${preflightCommandResult.dest}`);
+    }
+  } else {
+    logLine(`  Command already up to date: ${preflightCommandResult.dest}`);
   }
   logLine('');
 
