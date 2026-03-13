@@ -2,14 +2,14 @@
 
 Cross-platform npm CLI to bootstrap a project with Ruflo on Windows and Linux.
 
-## What this project is
+## 📘 What this project is
 
 `@mfjjs/ruflo-setup` implements the setup with a Node-based CLI command:
 
 - Package name: `@mfjjs/ruflo-setup`
 - Command name: `ruflo-setup`
 - Platform support: Windows and Linux (plus macOS by default)
-## Requirements
+## 📋 Requirements
 <details>
   <summary>Click to toggle visibility</summary>
 
@@ -37,13 +37,26 @@ corepack prepare pnpm@latest --activate
 ```
 </details>
 
-## Installation
+## 📦 Installation
 
 ```powershell
 pnpm -i -g @mfjjs/ruflo-setup
 ```
 
-## Usage
+## 💡 Why You Need This
+
+If you’re working on:
+
+* A brownfield application that never had RuFlow configured, or
+* A brand‑new project that hasn’t been set up with RuFlow yet,
+
+…then you currently have to configure RuFlow manually in each project. That means recreating the same structure, wiring, and boilerplate over and over.
+
+The new  command eliminates all of that. When you run it inside a project, it automatically generates the required RuFlow scaffolding — including all the files that belong in the  folder — so every project starts from a clean, consistent baseline.
+
+You only need to do this once in each folder.  Just run the command and you’re ready to go.
+
+## 🚀 Usage
 
 ### Bootstrap
 Use this once if you want Claude Code to expose the `/ruflo-setup` command globally.
@@ -77,7 +90,7 @@ ruflo-setup hooks install
 ruflo-setup hooks status
 ```
 
-## Project structure
+## 🗂️ Project structure
 
 - `package.json`: npm metadata, scripts, and `bin` mapping
 - `bin/ruflo-setup.js`: executable entry file the shell runs
@@ -89,7 +102,7 @@ ruflo-setup hooks status
 - `claude-hooks/check-ruflo.cjs`: SessionStart hook payload
 - `tests/cli.test.mjs`: smoke tests for CLI behavior
 
-## What the command line calls
+## 🖥️ What the command line calls
 
 After install/link, `ruflo-setup` resolves to your package `bin` entry:
 
@@ -103,7 +116,7 @@ After install/link, `ruflo-setup` resolves to your package `bin` entry:
 
 The shell shim launches `bin/ruflo-setup.js`, which imports `src/cli.js`, which dispatches to setup or hook subcommands.
 
-## How the CLI entry point works
+## ⚙️ How the CLI entry point works
 
 Flow:
 
@@ -117,7 +130,7 @@ Flow:
 	 - copies `templates/CLAUDE.md`
 	 - installs global SessionStart hook (unless skipped)
 
-## Local development with pnpm
+## 🛠️ Local development with pnpm
 
 From this repository root (`setup-ruflo/`):
 
@@ -127,7 +140,7 @@ pnpm test
 pnpm run test:cli
 ```
 
-## Link locally so command works everywhere
+## 🔗 Link locally so command works everywhere
 
 ```bash
 # from setup-ruflo/
@@ -139,7 +152,7 @@ ruflo-setup --dry-run --skip-init
 
 This is the fast edit loop: change files in `src/`, rerun `ruflo-setup`, and behavior updates immediately without reinstall.
 
-## Simulate a real install (deploy-style testing)
+## 🧪 Simulate a real install (deploy-style testing)
 
 Create a tarball and install it into a clean test location.
 
@@ -154,7 +167,7 @@ ruflo-setup --dry-run --skip-init
 
 This tests exactly what users get from a package install.
 
-## Global hook behavior
+## 🪝 Global hook behavior
 
 `ruflo-setup` installs a global Claude SessionStart command hook that runs:
 
