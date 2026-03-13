@@ -9,8 +9,9 @@ Cross-platform npm CLI to bootstrap a project with Ruflo on Windows and Linux.
 - Package name: `@mfjjs/ruflo-setup`
 - Command name: `ruflo-setup`
 - Platform support: Windows and Linux (plus macOS by default)
-
 ## Requirements
+<details>
+  <summary>Click to toggle visibility</summary>
 
 - Node.js 20+
 - pnpm available on PATH
@@ -33,6 +34,47 @@ Alternative (all platforms with recent Node.js):
 ```bash
 corepack enable
 corepack prepare pnpm@latest --activate
+```
+</details>
+
+## Installation
+
+```powershell
+pnpm -i -g @mfjjs/ruflo-setup
+```
+
+## Usage
+
+### Bootstrap
+Use this once if you want Claude Code to expose the `/ruflo-setup` command globally.
+
+```bash
+ruflo-setup hooks init
+```
+
+After that, when you open Claude Code in a project that does not already have Ruflo configured, you can run [**/ruflo-setup**](noop:) to start the setup flow.
+
+### Setup
+Use these commands when you want to run the setup directly from a shell.
+
+From the target project directory, run one of the following:
+
+```bash
+# full setup
+ruflo-setup
+
+# non-interactive
+ruflo-setup --yes
+
+# preview only
+ruflo-setup --dry-run --skip-init
+
+# skip global hook install
+ruflo-setup --no-hooks
+
+# hook operations
+ruflo-setup hooks install
+ruflo-setup hooks status
 ```
 
 ## Project structure
@@ -74,26 +116,6 @@ Flow:
 	 - writes platform-aware `.mcp.json`
 	 - copies `templates/CLAUDE.md`
 	 - installs global SessionStart hook (unless skipped)
-
-## Usage
-
-```bash
-# full setup
-ruflo-setup
-
-# non-interactive
-ruflo-setup --yes
-
-# preview only
-ruflo-setup --dry-run --skip-init
-
-# skip global hook install
-ruflo-setup --no-hooks
-
-# hook operations
-ruflo-setup hooks install
-ruflo-setup hooks status
-```
 
 ## Local development with pnpm
 
