@@ -233,8 +233,20 @@ function checkLayer7(cwd) {
   }
   for (const { rel, hint } of dirs) {
     const disp = `${rel}/`.replace(/\\/g, '/');
-    if (dirExists(path.join(cwd, rel))) { lines.push(`  ${OK} ${disp}`); ok += 1; }
-    else { lines.push(`  ${MISS} ${disp}${hint ? `  (${hint})` : ''}`); }
+    const full = path.join(cwd, rel);
+    if (dirExists(full)) {
+      let count = '';
+      if (rel.endsWith('agents') || rel.endsWith('skills')) {
+        try {
+          const n = fs.readdirSync(full).length;
+          const label = rel.endsWith('agents') ? 'agents' : 'skills';
+          count = `  (${n} ${label})`;
+        } catch { /* ignore */ }
+      }
+      lines.push(`  ${OK} ${disp}${count}`); ok += 1;
+    } else {
+      lines.push(`  ${MISS} ${disp}${hint ? `  (${hint})` : ''}`);
+    }
   }
 
   return { lines, ok, total: files.length + dirs.length };
@@ -280,6 +292,7 @@ export async function runStatus({ cwd, packageRoot }) {
     }
 
     process.stdout.write(`\nSummary: ${totalOk}/${totalChecks} features enabled\n`);
+    process.stdout.write(`For agents, skills, and slash commands reference: docs/ruflo-benefit.md\n`);
 
     const hasRequiredMissing = parseInt(process.version.slice(1), 10) < 20 || !process.env.ANTHROPIC_API_KEY;
     if (hasRequiredMissing) process.stdout.write(`Run 'ruflo-setup' to configure missing required features.\n`);
