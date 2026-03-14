@@ -90,12 +90,22 @@ ruflo-setup hooks install
 ruflo-setup hooks status
 ```
 
+### Status
+Check whether all Ruflo feature layers (0–8) are enabled in the current project:
+
+```bash
+ruflo-setup status
+```
+
+This prints a layer-by-layer report showing which features are active — prerequisites, global packages, optional WASM/ML packages, MCP servers, tool groups, environment variables, project scaffolding, and the Docker chat UI stack.
+
 ## 🗂️ Project structure
 
 - `package.json`: npm metadata, scripts, and `bin` mapping
 - `bin/ruflo-setup.js`: executable entry file the shell runs
 - `src/cli.js`: command router and argument handling
 - `src/setup.js`: setup workflow (`init`, `.mcp.json`, template copy)
+- `src/status.js`: layer-by-layer feature status checker (Layers 0–8)
 - `src/hooks.js`: global `check-ruflo` hook install/status
 - `src/utils.js`: reusable filesystem and argument helpers
 - `templates/CLAUDE.md`: bundled template copied into target project
@@ -129,6 +139,8 @@ Flow:
 	 - writes platform-aware `.mcp.json`
 	 - copies `templates/CLAUDE.md`
 	 - installs global SessionStart hook (unless skipped)
+
+When called as `ruflo-setup status`, step 5 dispatches to `src/status.js` which checks all layers (0–8) and prints a feature status report.
 
 ## 🛠️ Local development with pnpm
 

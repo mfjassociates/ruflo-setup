@@ -131,3 +131,61 @@ test('setup keeps global command template unchanged when already current', async
     assert.equal(fs.readFileSync(commandPath, 'utf8'), templateContent);
   });
 });
+
+test('status exits with code 0', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  const { code } = await captureStdout(() => runCli(['status'], tempDir));
+  assert.equal(code, 0);
+});
+
+test('status outputs all layer headers', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  const { output } = await captureStdout(() => runCli(['status'], tempDir));
+  assert.match(output, /Layer 0: Prerequisites/);
+  assert.match(output, /Layer 1: Global npm Packages/);
+  assert.match(output, /Layer 2: Optional Packages/);
+  assert.match(output, /Layer 3: MCP Servers/);
+  assert.match(output, /Layer 4: MCP Tool Groups/);
+  assert.match(output, /Layer 5: Environment Variables/);
+  assert.match(output, /Layer 6: Claude Code Hooks/);
+  assert.match(output, /Layer 7: Project Scaffolding/);
+  assert.match(output, /Layer 8: Docker/);
+  assert.match(output, /Summary:/);
+});
+
+test('status reports .mcp.json as present when it exists', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  fs.writeFileSync(path.join(tempDir, '.mcp.json'), JSON.stringify({
+    mcpServers: {
+      'claude-flow': { command: 'cmd', args: ['/c', 'npx', '-y', '@claude-flow/cli@latest', 'mcp', 'start'], env: {} }
+    }
+  }, null, 2), 'utf8');
+
+  const { output } = await captureStdout(() => runCli(['status'], tempDir));
+  assert.match(output, /\[OK\].*\.mcp\.json|\[OK\].*mcp\.json/);
+  assert.match(output, /claude-flow/);
+});
+
+test('status reports .mcp.json as missing when absent', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  const { output } = await captureStdout(() => runCli(['status'], tempDir));
+  assert.match(output, /\[--\].*\.mcp\.json|\[--\].*mcp\.json|not found|not configured/i);
+});
+
+test('setup dry-run includes MCP tool group env vars in generated .mcp.json', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  await withTempHome(async () => {
+    const { code, output } = await captureStdout(() =>
+      runCli(['--dry-run', '--skip-init', '--no-hooks', '--yes'], tempDir)
+    );
+    assert.equal(code, 0);
+    // The dry-run path does not write the file, so verify via toPlatformMcpConfig directly
+    const { toPlatformMcpConfig } = await import('../src/utils.js');
+    const config = toPlatformMcpConfig(process.platform);
+    const env = config.mcpServers['claude-flow'].env;
+    assert.equal(env.MCP_GROUP_SECURITY, 'true');
+    assert.equal(env.MCP_GROUP_BROWSER, 'true');
+    assert.equal(env.MCP_GROUP_NEURAL, 'true');
+    assert.equal(env.MCP_GROUP_AGENTIC_FLOW, 'true');
+  });
+});

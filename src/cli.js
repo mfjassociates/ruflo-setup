@@ -18,6 +18,7 @@ function printHelp() {
 
 Usage:
   ruflo-setup [options]
+  ruflo-setup status
   ruflo-setup hooks install [options]
   ruflo-setup hooks status
 
@@ -32,6 +33,7 @@ Options:
 
 Examples:
   ruflo-setup
+  ruflo-setup status
   ruflo-setup --dry-run --skip-init
   ruflo-setup hooks status
   ruflo-setup hooks install --dry-run
@@ -57,6 +59,12 @@ export async function runCli(argv, cwd) {
 
     const packageRoot = packageRootFromModule();
     const flags = parseArgs(argv);
+
+    if (flags.command === 'status') {
+      const { runStatus } = await import('./status.js');
+      await runStatus({ cwd, packageRoot });
+      return 0;
+    }
 
     if (flags.command === 'hooks') {
       const subcommand = argv[1] || 'status';
