@@ -2,6 +2,8 @@
 
 Cross-platform npm CLI to bootstrap a project with Ruflo on Windows and Linux.
 
+> **Deep dive:** [`docs/ruflo-benefits.md`](docs/ruflo-benefits.md) is a comprehensive reference (~900 lines) covering every feature layer, the MinCut/RuVector/RVF internals, all 80+ agents, 33 skills, 65 slash commands, and how agents and skills are invoked. Not a quick read.
+
 ## 📘 What this project is
 
 `@mfjjs/ruflo-setup` implements the setup with a Node-based CLI command:
