@@ -10,10 +10,13 @@
 1. [What Ruflo Is](#what-ruflo-is)
 2. [Complete Feature List](#complete-feature-list)
 3. [Where Everything Runs](#where-everything-runs)
-4. [Step-by-Step Enablement](#step-by-step-enablement)
-5. [MinCut, RuVector, and RVF Deep Dive](#mincut-ruvector-and-rvf-deep-dive)
-6. [Full Before/After: What the Combined Stack Changes](#full-beforeafter)
-7. [Sources](#sources)
+4. [How to Check Feature Status](#how-to-check-feature-status)
+5. [Step-by-Step Enablement](#step-by-step-enablement)
+6. [MinCut, RuVector, and RVF Deep Dive](#mincut-ruvector-and-rvf-deep-dive)
+7. [Full Before/After: What the Combined Stack Changes](#full-beforeafter)
+8. [Sources](#sources)
+9. [Agents & Skills: Origin Reference](#agents--skills-origin-reference)
+10. [How Agents and Skills Are Invoked](#how-agents-and-skills-are-invoked)
 
 ---
 
@@ -847,3 +850,94 @@ These are invoked directly as slash commands in Claude Code. All installed by `r
 | `/sparc:optimizer` | SPARC | Refactor and modularize code for performance and maintainability |
 | `/sparc:ask` | SPARC | Task formulation guide for delegating to the right agent |
 | `/sparc:tutorial` | SPARC | Interactive SPARC onboarding and guided walkthrough |
+
+---
+
+## How Agents and Skills Are Invoked
+
+Agents and skills are fundamentally different mechanisms. One spawns a subprocess; the other expands a prompt.
+
+---
+
+### Agents
+
+An agent is an **autonomous subprocess** — it gets its own context window, its own tool permissions, and runs independently from the conversation that spawned it.
+
+#### Three ways agents are invoked
+
+**1. Claude decides automatically**
+
+When Claude encounters a task that matches an agent's `description:` field (from its `.claude/agents/` YAML frontmatter), it may spawn one without being asked. The description is the routing signal.
+
+**2. You request one explicitly**
+
+```
+use the security-architect agent to audit src/auth/
+spawn a tester agent for the payment module
+```
+
+Claude calls the `Agent` tool internally with the matching `subagent_type`.
+
+**3. Ruflo swarm spawning (CLI or Task tool)**
+
+```bash
+ruflo agent spawn -t coder --name my-coder
+```
+
+In a swarm, agents are spawned in parallel via Claude Code's `Agent` tool, each receiving a full prompt with their instructions and tool list. They run concurrently and report results back to the orchestrator.
+
+#### Agent lifecycle
+
+```
+Spawned → Runs its prompt autonomously → Returns one result message → Terminated
+```
+
+---
+
+### Skills
+
+A skill is **a prompt template** — it gets loaded into the *current* conversation as detailed instructions. No subprocess is created. Claude reads the skill content and acts on it within the same context window.
+
+#### Two ways skills are invoked
+
+**1. Slash command — typed by you**
+
+```
+/commit
+/ruflo-setup
+/sparc:tdd
+/github:code-review
+```
+
+Claude Code resolves the slash command to the skill's Markdown file and injects its content as the task instructions for that turn.
+
+**2. Claude triggers one automatically**
+
+When a skill defines trigger conditions in its frontmatter (`TRIGGER when:`), Claude calls the `Skill` tool itself before responding. For example, the `claude-api` skill triggers automatically when it detects `import anthropic` in code you share.
+
+---
+
+### Side-by-Side Comparison
+
+| | Agent | Skill |
+|---|---|---|
+| **What it is** | Subprocess with its own context window | Prompt template injected into the current context |
+| **Invoked by** | `Agent` tool internally, or `ruflo agent spawn` CLI | Slash command `/name`, or `Skill` tool triggered automatically |
+| **Runs where** | Separate context window, isolated | Same conversation, same context window |
+| **Parallelism** | Yes — multiple agents run concurrently | No — one skill per turn |
+| **Tool access** | Controlled by agent YAML `tools:` list | Same tools as the current conversation |
+| **Defined in** | `.claude/agents/**/*.md` or `.yaml` | `.claude/skills/**/SKILL.md` or `.claude/commands/*.md` |
+| **Returns** | One result message back to the spawner | Continues the conversation with expanded instructions |
+| **Best for** | Long-running, isolated, parallel work | Workflow shortcuts and reusable multi-step procedures |
+| **Source: Claude** | `general-purpose`, `Explore`, `Plan`, `statusline-setup`, `claude-code-guide` | `keybindings-help`, `simplify`, `loop`, `claude-api` |
+| **Source: Ruflo** | All 80+ agents in `.claude/agents/` | All 33 skills + 65 slash commands in `.claude/skills/` and `.claude/commands/` |
+
+---
+
+### Mental Model
+
+> **Skill** = "here are my detailed instructions for this task" — Claude reads it and does the work itself in the current conversation.
+>
+> **Agent** = "go do this task independently and come back with the answer" — Claude delegates to a subprocess and waits for the result.
+
+A skill can instruct Claude to spawn agents. For example, `/swarm-orchestration` is a skill whose content tells Claude to initialize a swarm and spawn multiple parallel agents. **The skill is the recipe; the agents do the cooking.**
