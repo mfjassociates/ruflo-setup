@@ -520,3 +520,330 @@ WITH full stack enabled:
 | 14 | Local `.mcp.json` | Three MCP servers, env vars |
 | 15 | Local `.claude-flow/data/auto-memory-store.json` | Windows SDK requirement for `@ruvector/attention` |
 | 16 | npmjs.com — `ruflo` | Version confirmation (3.5.15) |
+
+---
+
+## Agents & Skills: Origin Reference
+
+> `[Claude]` = built into Claude Code by Anthropic — always available, no install needed.
+> `[Ruflo]` = installed by `ruflo init --full` into `.claude/agents/` or `.claude/skills/`.
+
+---
+
+### Agents
+
+#### Claude Code Built-in Agents
+
+| Agent | Description |
+|---|---|
+| `general-purpose` | Default multi-step task agent; used when no specialized type is specified |
+| `Explore` | Fast read-only codebase exploration; searches files, patterns, and answers structure questions |
+| `Plan` | Software architect agent; designs implementation plans and identifies critical files |
+| `statusline-setup` | Configures the Claude Code status line setting in user config |
+| `claude-code-guide` | Answers questions about Claude Code CLI features, hooks, MCP, and the Anthropic API |
+
+#### Ruflo Agents — Core Development
+
+| Agent | Description |
+|---|---|
+| `coder` | Implementation specialist for writing clean, efficient code with self-learning capabilities |
+| `planner` | Strategic planning and task orchestration agent with AI-powered resource optimization |
+| `researcher` | Deep research and information gathering specialist with AI-enhanced pattern recognition |
+| `reviewer` | Code review and quality assurance specialist with AI-powered pattern detection |
+| `tester` | Comprehensive testing and quality assurance specialist with AI-powered test generation |
+
+#### Ruflo Agents — Analysis & Architecture
+
+| Agent | Description |
+|---|---|
+| `code-analyzer` | Advanced code quality analysis agent for comprehensive code reviews and improvements |
+| `system-architect` | Expert agent for system architecture design, patterns, and high-level technical decisions |
+
+#### Ruflo Agents — Swarm Coordination
+
+| Agent | Description |
+|---|---|
+| `hierarchical-coordinator` | Queen-led hierarchical swarm coordination with specialized worker delegation |
+| `mesh-coordinator` | Peer-to-peer mesh network swarm with distributed decision making and fault tolerance |
+| `adaptive-coordinator` | Dynamic topology switching coordinator with self-organizing swarm patterns and real-time optimization |
+| `smart-agent` | Intelligent agent coordination and dynamic spawning specialist |
+| `swarm-init` | Swarm initialization and topology optimization specialist |
+| `task-orchestrator` | Central coordination agent for task decomposition, execution planning, and result synthesis |
+| `memory-coordinator` | Manage persistent memory across sessions and facilitate cross-agent memory sharing |
+| `perf-analyzer` | Performance bottleneck analyzer for identifying and resolving workflow inefficiencies |
+
+#### Ruflo Agents — Consensus & Distributed
+
+| Agent | Description |
+|---|---|
+| `byzantine-coordinator` | Coordinates Byzantine fault-tolerant consensus protocols with malicious actor detection |
+| `raft-manager` | Manages Raft consensus algorithm with leader election and log replication |
+| `gossip-coordinator` | Coordinates gossip-based consensus protocols for scalable eventually consistent systems |
+| `crdt-synchronizer` | Implements Conflict-free Replicated Data Types for eventually consistent state synchronization |
+| `quorum-manager` | Implements dynamic quorum adjustment and intelligent membership management |
+| `security-manager` | Implements comprehensive security mechanisms for distributed consensus protocols |
+| `performance-benchmarker` | Implements comprehensive performance benchmarking for distributed consensus protocols |
+| `consensus-coordinator` | Distributed consensus agent that uses sublinear solvers for fast agreement protocols in multi-agent systems |
+
+#### Ruflo Agents — SPARC Methodology
+
+| Agent | Description |
+|---|---|
+| `specification` | SPARC Specification phase specialist for requirements analysis with self-learning |
+| `pseudocode` | SPARC Pseudocode phase specialist for algorithm design with self-learning |
+| `architecture` | SPARC Architecture phase specialist for system design with self-learning |
+| `refinement` | SPARC Refinement phase specialist for iterative improvement with self-learning |
+| `sparc-coord` | Strategic planning and task orchestration agent with AI-powered resource optimization |
+| `sparc-coder` | Implementation specialist for writing clean, efficient code with self-learning capabilities |
+| `sparc-orchestrator` | V3 SPARC methodology orchestrator that coordinates all five SPARC phases with ReasoningBank learning |
+
+#### Ruflo Agents — GitHub & Repository
+
+| Agent | Description |
+|---|---|
+| `pr-manager` | Comprehensive pull request management with swarm coordination for automated reviews, testing, and merge workflows |
+| `code-review-swarm` | Deploy specialized AI agents to perform comprehensive, intelligent code reviews that go beyond traditional static analysis |
+| `issue-tracker` | Intelligent issue management and project coordination with automated tracking, progress monitoring, and team coordination |
+| `release-manager` | Automated release coordination and deployment with ruv-swarm orchestration for seamless version management, testing, and deployment across multiple packages |
+| `release-swarm` | Orchestrate complex software releases using AI swarms that handle everything from changelog generation to multi-platform deployment |
+| `repo-architect` | Repository structure optimization and multi-repo management with ruv-swarm coordination for scalable project architecture and development workflows |
+| `workflow-automation` | GitHub Actions workflow automation agent that creates intelligent, self-organizing CI/CD pipelines with adaptive multi-agent coordination and automated optimization |
+| `github-modes` | Comprehensive GitHub integration modes for workflow orchestration, PR management, and repository coordination with batch optimization |
+| `multi-repo-swarm` | Cross-repository swarm orchestration for organization-wide automation and intelligent collaboration |
+| `project-board-sync` | Synchronize AI swarms with GitHub Projects for visual task management, progress tracking, and team coordination |
+| `sync-coordinator` | Multi-repository synchronization coordinator that manages version alignment, dependency synchronization, and cross-package integration with intelligent swarm orchestration |
+| `swarm-issue` | GitHub issue-based swarm coordination agent that transforms issues into intelligent multi-agent tasks with automatic decomposition and progress tracking |
+| `swarm-pr` | Pull request swarm management agent that coordinates multi-agent code review, validation, and integration workflows with automated PR lifecycle management |
+
+#### Ruflo Agents — Specialized Development
+
+| Agent | Description |
+|---|---|
+| `backend-dev` | Specialized agent for backend API development with self-learning and pattern recognition |
+| `ml-developer` | ML developer with self-learning hyperparameter optimization and pattern recognition |
+| `mobile-dev` | Expert agent for React Native mobile application development across iOS and Android |
+| `cicd-engineer` | Specialized agent for GitHub Actions CI/CD pipeline creation and optimization |
+| `api-docs` | Expert agent for creating OpenAPI documentation with pattern learning |
+| `base-template-generator` | Creates foundational templates, boilerplate code, or starter configurations for new projects, components, or features |
+| `test-long-runner` | Test agent that can run for 30+ minutes on complex tasks |
+
+#### Ruflo Agents — Performance & Optimization
+
+| Agent | Description |
+|---|---|
+| `Benchmark Suite` | Comprehensive performance benchmarking, regression detection and performance validation |
+| `Load Balancing Coordinator` | Dynamic task distribution, work-stealing algorithms and adaptive load balancing |
+| `Performance Monitor` | Real-time metrics collection, bottleneck analysis, SLA monitoring and anomaly detection |
+| `Resource Allocator` | Adaptive resource allocation, predictive scaling and intelligent capacity planning |
+| `Topology Optimizer` | Dynamic swarm topology reconfiguration and communication pattern optimization |
+| `goal-planner` | Goal-Oriented Action Planning (GOAP) specialist that dynamically creates intelligent plans to achieve complex objectives |
+| `sublinear-goal-planner` | Goal-Oriented Action Planning specialist using sublinear solvers for large-scale distributed planning |
+| `matrix-optimizer` | Expert agent for matrix analysis and optimization using sublinear algorithms |
+| `pagerank-analyzer` | Expert agent for graph analysis and PageRank calculations using sublinear algorithms |
+| `performance-optimizer` | System performance optimization agent that identifies bottlenecks and optimizes resource allocation using sublinear algorithms |
+| `trading-predictor` | Advanced financial trading agent that leverages temporal advantage calculations to predict and execute trades before market data arrives |
+
+#### Ruflo Agents — V3 Security & Intelligence
+
+| Agent | Description |
+|---|---|
+| `security-architect` | V3 Security Architecture specialist with ReasoningBank learning, HNSW threat pattern search, and zero-trust design capabilities |
+| `security-architect-aidefence` | Enhanced V3 Security Architecture specialist with AIMDS integration combining ReasoningBank learning with real-time prompt injection detection and behavioral analysis |
+| `security-auditor` | Advanced security auditor with self-learning vulnerability detection, CVE database search, and compliance auditing |
+| `aidefence-guardian` | AI Defense Guardian agent that monitors all agent inputs/outputs for manipulation attempts using AIMDS |
+| `injection-analyst` | Deep analysis specialist for prompt injection and jailbreak attempts with pattern learning |
+| `pii-detector` | Specialized PII detection agent that scans code and data for sensitive information leaks |
+| `claims-authorizer` | V3 Claims-based authorization specialist implementing ADR-010 for fine-grained access control across swarm agents and MCP tools |
+
+#### Ruflo Agents — V3 Memory & Learning
+
+| Agent | Description |
+|---|---|
+| `memory-specialist` | V3 memory optimization specialist with HNSW indexing, hybrid backend management, vector quantization, and EWC++ for preventing catastrophic forgetting |
+| `sona-learning-optimizer` | SONA-powered self-optimizing agent with LoRA fine-tuning and EWC++ memory preservation |
+| `reasoningbank-learner` | V3 ReasoningBank integration specialist for trajectory tracking, verdict judgment, pattern distillation, and experience replay using HNSW-indexed memory |
+| `swarm-memory-manager` | V3 distributed memory manager for cross-agent state synchronization, CRDT replication, and namespace coordination across the swarm |
+| `collective-intelligence-coordinator` | Hive-mind collective decision making with Byzantine fault-tolerant consensus, attention-based coordination, and emergent intelligence patterns |
+
+#### Ruflo Agents — V3 Architecture & Domain
+
+| Agent | Description |
+|---|---|
+| `adr-architect` | V3 Architecture Decision Record specialist that documents, tracks, and enforces architectural decisions with ReasoningBank integration for pattern learning |
+| `ddd-domain-expert` | V3 Domain-Driven Design specialist for bounded context identification, aggregate design, domain modeling, and ubiquitous language enforcement |
+| `v3-integration-architect` | V3 deep agentic-flow@alpha integration specialist implementing ADR-001 for eliminating duplicate code and building claude-flow as a specialized extension |
+| `performance-engineer` | V3 Performance Engineering Agent specialized in Flash Attention optimization, WASM SIMD acceleration, token usage optimization, and comprehensive performance profiling with SONA integration |
+
+#### Ruflo Agents — Flow Nexus (cloud)
+
+| Agent | Description |
+|---|---|
+| `flow-nexus-app-store` | Application marketplace and template management specialist that handles app publishing, discovery, deployment, and marketplace operations within Flow Nexus |
+| `flow-nexus-auth` | Flow Nexus authentication and user management specialist that handles login, registration, session management, and user account operations |
+| `flow-nexus-challenges` | Coding challenges and gamification specialist that manages challenge creation, solution validation, leaderboards, and achievement systems within Flow Nexus |
+| `flow-nexus-neural` | Neural network training and deployment specialist that manages distributed neural network training, inference, and model lifecycle using Flow Nexus cloud infrastructure |
+| `flow-nexus-payments` | Credit management and billing specialist that handles payment processing, credit systems, tier management, and financial operations within Flow Nexus |
+| `flow-nexus-sandbox` | E2B sandbox deployment and management specialist that creates, configures, and manages isolated execution environments for code development and testing |
+| `flow-nexus-swarm` | AI swarm orchestration and management specialist that deploys, coordinates, and scales multi-agent swarms in the Flow Nexus cloud platform |
+| `flow-nexus-user-tools` | User management and system utilities specialist that handles profile management, storage operations, real-time subscriptions, and platform administration |
+| `flow-nexus-workflow` | Event-driven workflow automation specialist that creates, executes, and manages complex automated workflows with message queue processing and intelligent agent coordination |
+
+#### Ruflo Agents — Testing & Validation
+
+| Agent | Description |
+|---|---|
+| `tdd-london-swarm` | TDD London School specialist for mock-driven development within swarm coordination |
+| `production-validator` | Production validation specialist ensuring applications are fully implemented and deployment-ready |
+| `agentic-payments` | Multi-agent payment authorization specialist for autonomous AI commerce with cryptographic verification and Byzantine consensus |
+
+---
+
+### Skills
+
+#### Claude Code Built-in Skills
+
+| Skill | Invoke | Description |
+|---|---|---|
+| `keybindings-help` | `/keybindings-help` | Customize keyboard shortcuts and chord bindings in `~/.claude/keybindings.json` |
+| `simplify` | `/simplify` | Review recently changed code for quality and efficiency, then fix issues found |
+| `loop` | `/loop` | Run a prompt or slash command on a recurring interval (e.g. `/loop 5m /foo`) |
+| `claude-api` | `/claude-api` | Build applications with the Claude API or Anthropic SDK |
+
+#### Ruflo Skills — AgentDB & Vector Search
+
+| Skill | Invoke | Description |
+|---|---|---|
+| `agentdb-advanced` | `/agentdb-advanced` | Master advanced AgentDB features including QUIC synchronization, multi-database management, custom distance metrics, hybrid search, and distributed systems integration |
+| `agentdb-learning` | `/agentdb-learning` | Create and train AI learning plugins with AgentDB's 9 reinforcement learning algorithms |
+| `agentdb-memory-patterns` | `/agentdb-memory-patterns` | Implement persistent memory patterns for AI agents using AgentDB including session memory, long-term storage, pattern learning, and context management |
+| `agentdb-optimization` | `/agentdb-optimization` | Optimize AgentDB performance with quantization, HNSW indexing, caching, and batch operations |
+| `agentdb-vector-search` | `/agentdb-vector-search` | Implement semantic vector search with AgentDB for intelligent document retrieval, similarity matching, and context-aware querying |
+
+#### Ruflo Skills — ReasoningBank & Learning
+
+| Skill | Invoke | Description |
+|---|---|---|
+| `reasoningbank-agentdb` | `/reasoningbank-agentdb` | Implement ReasoningBank adaptive learning with AgentDB's 150x faster vector database including trajectory tracking, verdict judgment, memory distillation, and pattern recognition |
+| `reasoningbank-intelligence` | `/reasoningbank-intelligence` | Implement adaptive learning with ReasoningBank for pattern recognition, strategy optimization, and continuous improvement |
+
+#### Ruflo Skills — Swarm Orchestration
+
+| Skill | Invoke | Description |
+|---|---|---|
+| `swarm-orchestration` | `/swarm-orchestration` | Orchestrate multi-agent swarms with agentic-flow for parallel task execution, dynamic topology, and intelligent coordination |
+| `swarm-advanced` | `/swarm-advanced` | Advanced swarm orchestration patterns for research, development, testing, and complex distributed workflows |
+| `sparc-methodology` | `/sparc-methodology` | SPARC comprehensive development methodology with multi-agent orchestration covering all five phases |
+| `stream-chain` | `/stream-chain` | Stream-JSON chaining for multi-agent pipelines, data transformation, and sequential workflows |
+| `verification-quality` | `/verification-quality` | Comprehensive truth scoring, code quality verification, and automatic rollback system with 0.95 accuracy threshold |
+
+#### Ruflo Skills — GitHub Workflows
+
+| Skill | Invoke | Description |
+|---|---|---|
+| `github-code-review` | `/github-code-review` | Comprehensive GitHub code review with AI-powered swarm coordination |
+| `github-multi-repo` | `/github-multi-repo` | Multi-repository coordination, synchronization, and architecture management with AI swarm orchestration |
+| `github-project-management` | `/github-project-management` | Comprehensive GitHub project management with swarm-coordinated issue tracking, project board automation, and sprint planning |
+| `github-release-management` | `/github-release-management` | Comprehensive GitHub release orchestration with AI swarm coordination for automated versioning, testing, deployment, and rollback management |
+| `github-workflow-automation` | `/github-workflow-automation` | Advanced GitHub Actions workflow automation with AI swarm coordination, intelligent CI/CD pipelines, and comprehensive repository management |
+
+#### Ruflo Skills — Development Tools
+
+| Skill | Invoke | Description |
+|---|---|---|
+| `browser` | `/browser` | Web browser automation with AI-optimized snapshots for claude-flow agents |
+| `hooks-automation` | `/hooks-automation` | Automated coordination, formatting, and learning from Claude Code operations using intelligent hooks with MCP integration |
+| `pair-programming` | `/pair-programming` | AI-assisted pair programming with multiple modes, real-time verification, quality monitoring, and comprehensive testing |
+| `skill-builder` | `/skill-builder` | Create new Claude Code Skills with proper YAML frontmatter, progressive disclosure structure, and complete directory organization |
+
+#### Ruflo Skills — Flow Nexus (cloud)
+
+| Skill | Invoke | Description |
+|---|---|---|
+| `flow-nexus-neural` | `/flow-nexus-neural` | Train and deploy neural networks in distributed E2B sandboxes with Flow Nexus |
+| `flow-nexus-platform` | `/flow-nexus-platform` | Comprehensive Flow Nexus platform management covering authentication, sandboxes, app deployment, payments, and challenges |
+| `flow-nexus-swarm` | `/flow-nexus-swarm` | Cloud-based AI swarm deployment and event-driven workflow automation with Flow Nexus platform |
+
+#### Ruflo Skills — V3 Implementation
+
+| Skill | Invoke | Description |
+|---|---|---|
+| `v3-cli-modernization` | `/v3-cli-modernization` | CLI modernization and hooks system enhancement for claude-flow v3 with interactive prompts, command decomposition, and intelligent workflow automation |
+| `v3-core-implementation` | `/v3-core-implementation` | Core module implementation for claude-flow v3 implementing DDD domains, clean architecture patterns, dependency injection, and modular TypeScript codebase |
+| `v3-ddd-architecture` | `/v3-ddd-architecture` | Domain-Driven Design architecture for claude-flow v3 implementing modular, bounded context architecture with clean separation of concerns and microkernel pattern |
+| `v3-integration-deep` | `/v3-integration-deep` | Deep agentic-flow@alpha integration implementing ADR-001, eliminating 10,000+ duplicate lines by building claude-flow as a specialized extension |
+| `v3-mcp-optimization` | `/v3-mcp-optimization` | MCP server optimization and transport layer enhancement for claude-flow v3 with connection pooling, load balancing, and sub-100ms response times |
+| `v3-memory-unification` | `/v3-memory-unification` | Unify 6+ memory systems into AgentDB with HNSW indexing for 150x-12,500x search improvements implementing ADR-006 and ADR-009 |
+| `v3-performance-optimization` | `/v3-performance-optimization` | Achieve aggressive v3 performance targets including 2.49x-7.47x Flash Attention speedup, 150x-12,500x search improvements, and 50-75% memory reduction |
+| `v3-security-overhaul` | `/v3-security-overhaul` | Complete security architecture overhaul for claude-flow v3 addressing critical CVEs and implementing secure-by-default patterns |
+| `v3-swarm-coordination` | `/v3-swarm-coordination` | 15-agent hierarchical mesh coordination for v3 implementation orchestrating parallel execution across security, core, and integration domains |
+
+#### Ruflo Skills — Slash Commands (from `.claude/commands/`)
+
+These are invoked directly as slash commands in Claude Code. All installed by `ruflo init --full`.
+
+| Skill | Category | Description |
+|---|---|---|
+| `/claude-flow-help` | Claude Flow | Show Claude Flow commands and usage reference |
+| `/claude-flow-memory` | Claude Flow | Interact with the Claude Flow persistent memory system |
+| `/claude-flow-swarm` | Claude Flow | Coordinate multi-agent swarms for complex parallel tasks |
+| `/ruflo-setup` | Setup | Bootstrap or reconfigure Ruflo + Claude Flow in the current project |
+| `/analysis:bottleneck-detect` | Analysis | Detect performance bottlenecks in code or workflows |
+| `/analysis:performance-bottlenecks` | Analysis | Analyze and report performance bottleneck patterns |
+| `/analysis:performance-report` | Analysis | Generate a formatted performance analysis report |
+| `/analysis:token-efficiency` | Analysis | Optimize Claude API token usage in prompts and responses |
+| `/analysis:token-usage` | Analysis | Report current token consumption and usage patterns |
+| `/automation:auto-agent` | Automation | Automatically select and spawn the best agent for a task |
+| `/automation:self-healing` | Automation | Create self-healing workflows that recover from failures |
+| `/automation:session-memory` | Automation | Persist and restore cross-session agent memory |
+| `/automation:smart-agents` | Automation | Smart agent auto-spawning based on task classification |
+| `/automation:smart-spawn` | Automation | Intelligently spawn agents with task-appropriate configuration |
+| `/automation:workflow-select` | Automation | Select the optimal workflow template for the current task |
+| `/github:code-review` | GitHub | Perform AI-assisted code review on changed files |
+| `/github:code-review-swarm` | GitHub | Deploy a swarm of agents for comprehensive automated code review |
+| `/github:github-modes` | GitHub | Switch between GitHub workflow modes (PR, issue, release, etc.) |
+| `/github:github-swarm` | GitHub | Orchestrate GitHub operations using a coordinated agent swarm |
+| `/github:issue-tracker` | GitHub | Track and manage GitHub issues with AI coordination |
+| `/github:issue-triage` | GitHub | Automatically triage and prioritize incoming GitHub issues |
+| `/github:multi-repo-swarm` | GitHub | Coordinate changes across multiple repositories simultaneously |
+| `/github:pr-enhance` | GitHub | Enhance an existing pull request with AI-generated improvements |
+| `/github:pr-manager` | GitHub | Full pull request lifecycle management and review coordination |
+| `/github:project-board-sync` | GitHub | Sync project state with GitHub Projects boards |
+| `/github:release-manager` | GitHub | Orchestrate versioned software releases end-to-end |
+| `/github:release-swarm` | GitHub | Automated release pipeline using coordinated agent swarms |
+| `/github:repo-analyze` | GitHub | Deep analysis of a repository's structure, quality, and health |
+| `/github:repo-architect` | GitHub | Design and optimize repository structure and organization |
+| `/github:swarm-issue` | GitHub | Convert GitHub issues into coordinated multi-agent tasks |
+| `/github:swarm-pr` | GitHub | Manage pull request lifecycle with swarm agent coordination |
+| `/github:sync-coordinator` | GitHub | Synchronize versions and dependencies across repositories |
+| `/github:workflow-automation` | GitHub | Create and optimize GitHub Actions CI/CD pipelines |
+| `/hooks:overview` | Hooks | Overview of the Claude Code hooks system and available hooks |
+| `/hooks:pre-edit` | Hooks | Configure pre-edit hook for context injection before file edits |
+| `/hooks:post-edit` | Hooks | Configure post-edit hook to record and learn from edit outcomes |
+| `/hooks:pre-task` | Hooks | Configure pre-task hook for agent suggestions and risk checks |
+| `/hooks:post-task` | Hooks | Configure post-task hook for learning and pattern storage |
+| `/hooks:session-end` | Hooks | Configure session-end hook for state persistence |
+| `/hooks:setup` | Hooks | Set up and configure the full ruv-swarm hooks system |
+| `/monitoring:agent-metrics` | Monitoring | Display real-time metrics for all active agents |
+| `/monitoring:agents` | Monitoring | List all active agents and their current status |
+| `/monitoring:real-time-view` | Monitoring | Live dashboard view of swarm activity and performance |
+| `/monitoring:status` | Monitoring | Check overall coordination and swarm health status |
+| `/monitoring:swarm-monitor` | Monitoring | Continuous monitoring and alerting for swarm operations |
+| `/optimization:auto-topology` | Optimization | Automatically select the optimal swarm topology for the task |
+| `/optimization:cache-manage` | Optimization | Manage and optimize the pattern and response cache |
+| `/optimization:parallel-execute` | Optimization | Execute independent tasks in parallel across multiple agents |
+| `/optimization:parallel-execution` | Optimization | Configure and run parallel task execution workflows |
+| `/optimization:topology-optimize` | Optimization | Optimize swarm topology based on current workload profile |
+| `/sparc:sparc` | SPARC | SPARC orchestrator — break down large objectives into delegated phases |
+| `/sparc:spec-pseudocode` | SPARC | Write full specification and pseudocode for a feature or system |
+| `/sparc:architect` | SPARC | Design system architecture with component breakdown and ADRs |
+| `/sparc:code` | SPARC | Generate clean, modular code from pseudocode and architecture |
+| `/sparc:tdd` | SPARC | Test-Driven Development mode with red-green-refactor cycle |
+| `/sparc:debug` | SPARC | Diagnose and fix runtime bugs, logic errors, and failures |
+| `/sparc:security-review` | SPARC | Static and dynamic security audit with vulnerability reporting |
+| `/sparc:docs-writer` | SPARC | Write concise Markdown documentation for APIs and systems |
+| `/sparc:devops` | SPARC | Automate infrastructure deployment and CI/CD management |
+| `/sparc:integration` | SPARC | Merge multi-phase outputs into a working production system |
+| `/sparc:mcp` | SPARC | Integrate external MCP tools and services into a workflow |
+| `/sparc:optimizer` | SPARC | Refactor and modularize code for performance and maintainability |
+| `/sparc:ask` | SPARC | Task formulation guide for delegating to the right agent |
+| `/sparc:tutorial` | SPARC | Interactive SPARC onboarding and guided walkthrough |
