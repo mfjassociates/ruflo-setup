@@ -60,6 +60,15 @@ You only need to do this once in each folder.  Just run the command and you’re
 
 ## 🚀 Usage
 
+### Status
+Check whether all Ruflo feature layers (0–8) are enabled in the current project:
+
+```bash
+ruflo-setup status
+```
+
+This prints a layer-by-layer report showing which features are active — prerequisites, global packages, optional WASM/ML packages, MCP servers, tool groups, environment variables, project scaffolding, and the Docker chat UI stack.
+
 ### Bootstrap
 Use this once if you want Claude Code to expose the `/ruflo-setup` command globally.
 
@@ -91,15 +100,6 @@ ruflo-setup --no-hooks
 ruflo-setup hooks install
 ruflo-setup hooks status
 ```
-
-### Status
-Check whether all Ruflo feature layers (0–8) are enabled in the current project:
-
-```bash
-ruflo-setup status
-```
-
-This prints a layer-by-layer report showing which features are active — prerequisites, global packages, optional WASM/ML packages, MCP servers, tool groups, environment variables, project scaffolding, and the Docker chat UI stack.
 
 ## 🗂️ Project structure
 
