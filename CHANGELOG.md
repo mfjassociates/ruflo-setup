@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [0.2.0](https://gitlab.mfj.local:8022/mario/ruflo-setup/compare/v0.1.9...v0.2.0) (2026-03-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cli:** The CLI now includes a new command which may affect existing scripts that rely on the previous command structure.
+
+### Features
+
+* **cli:** add 'status' command to check feature status ([d551664](https://gitlab.mfj.local:8022/mario/ruflo-setup/commit/d551664619635e7efbbc9a9810266ecfe2212d1c))
+* **docs:** add detailed agents and skills sections to Ruflo benefit documentation ([c66d212](https://gitlab.mfj.local:8022/mario/ruflo-setup/commit/c66d212f4ee25390ab139e43131ecb548b7bcb5c))
+* **docs:** add link to ruflo-benefits.md and renamed to plural ([2820aeb](https://gitlab.mfj.local:8022/mario/ruflo-setup/commit/2820aeb5cebbfad0ac7b568291aa55a49076c6c3))
+* **docs:** update Ruflo benefit documentation with agents and skills sections ([8feb883](https://gitlab.mfj.local:8022/mario/ruflo-setup/commit/8feb8836c88ec5096a907eb4c842b0b3b4c55b4c))
+* **status:** enhance directory checks to display count of agents and skills ([3ade22b](https://gitlab.mfj.local:8022/mario/ruflo-setup/commit/3ade22b10ba1840f405b8f239f2a723f6d4089d7))
+
 ### [0.1.9](https://gitlab.mfj.local:8022/mario/ruflo-setup/compare/v0.1.8...v0.1.9) (2026-03-13)
 
 ### [0.1.8](https://gitlab.mfj.local:8022/mario/ruflo-setup/compare/v0.1.7...v0.1.8) (2026-03-13)
