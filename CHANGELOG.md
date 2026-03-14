@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.2](https://gitlab.mfj.local:8022/mario/ruflo-setup/compare/v0.2.1...v0.2.2) (2026-03-14)
+
+
+### Features
+
+* **package:** add ruflo-benefits.md to package files ([28a308a](https://gitlab.mfj.local:8022/mario/ruflo-setup/commit/28a308a005516981b06a213a053a1184c9644963))
+
 ### [0.2.1](https://gitlab.mfj.local:8022/mario/ruflo-setup/compare/v0.2.0...v0.2.1) (2026-03-14)
 
 
