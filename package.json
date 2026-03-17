@@ -32,9 +32,14 @@
   "publishConfig": {
     "access": "public"
   },
+  "repository": {
+    "type": "git",
+    "url": "http:s://github.com/mfjassociates/ruflo-setup.git"
+  },
   "bugs": {
     "url": "https://github.com/mfjassociates/ruflo-setup/issues"
   },
+  "homepage": "https://github.com/mfjassociates/ruflo-setup#readme",
   "license": "MIT",
   "packageManager": "pnpm@10.32.1"
 }
