@@ -2,7 +2,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 import { parseArgs } from './utils.js';
-import { runSetup, runCleanup } from './setup.js';
+import { runSetup, runCleanup, runUpdate } from './setup.js';
 import { getGlobalHookStatus, installGlobalCheckRufloHook } from './hooks.js';
 
 const require = createRequire(import.meta.url);
@@ -19,6 +19,7 @@ function printHelp() {
 Usage:
   ruflo-setup [options]
   ruflo-setup status
+  ruflo-setup update [--dry-run]
   ruflo-setup cleanup [--dry-run]
   ruflo-setup hooks install [options]
   ruflo-setup hooks status
@@ -33,11 +34,13 @@ Options:
   --verbose        Extra output
 
 Commands:
+  update           Update @mfjjs/ruflo-setup itself to the latest published version
   cleanup          Remove all Ruflo packages from the npm global registry
                    (ruflo, @mfjjs/ruflo-setup, claude-flow, @claude-flow/cli, ruv-swarm)
 
 Examples:
   ruflo-setup
+  ruflo-setup update
   ruflo-setup status
   ruflo-setup cleanup
   ruflo-setup cleanup --dry-run
@@ -98,6 +101,11 @@ export async function runCli(argv, cwd) {
 
       process.stderr.write(`Unknown hooks subcommand: ${subcommand}\n`);
       return 1;
+    }
+
+    if (flags.command === 'update') {
+      runUpdate({ dryRun: flags.dryRun });
+      return 0;
     }
 
     if (flags.command === 'cleanup') {

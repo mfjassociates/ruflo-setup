@@ -40,12 +40,11 @@ function fileExists(p) {
   }
 }
 
-// Flatten npm/pnpm --json list result into a name->version map (1 level deep).
+// Flatten pnpm --json list result into a name->version map (1 level deep).
 function buildPkgMap(jsonText) {
   const map = {};
   try {
     const parsed = JSON.parse(jsonText || '{}');
-    // npm list -g returns an array with one element, pnpm returns an object
     const root = Array.isArray(parsed) ? parsed[0] : parsed;
     const deps = root?.dependencies ?? {};
     for (const [name, info] of Object.entries(deps)) {
@@ -60,13 +59,7 @@ function buildPkgMap(jsonText) {
   return map;
 }
 
-// Tries npm list -g first, falls back to pnpm list -g.
 function getGlobalPkgMap() {
-  const npmRes = spawn('npm', ['list', '-g', '--depth=1', '--json']);
-  if (npmRes.status === 0 && npmRes.stdout) {
-    const m = buildPkgMap(npmRes.stdout);
-    if (Object.keys(m).length > 0) return m;
-  }
   const pnpmRes = spawn('pnpm', ['list', '-g', '--depth=1', '--json']);
   if (pnpmRes.status === 0 && pnpmRes.stdout) {
     return buildPkgMap(pnpmRes.stdout);
@@ -95,7 +88,7 @@ function checkLayer0() {
     const ver = (claudeRes.stdout || '').trim();
     lines.push(`  ${OK} Claude Code CLI${ver ? `  ${ver}` : ''}`); ok += 1;
   } else {
-    lines.push(`  ${MISS} Claude Code CLI  (install: npm install -g @anthropic-ai/claude-code)`);
+    lines.push(`  ${MISS} Claude Code CLI  (install: pnpm add -g @anthropic-ai/claude-code)`);
   }
 
   if (process.env.ANTHROPIC_API_KEY) {
@@ -113,7 +106,7 @@ function checkLayer1(pkgMap) {
   for (const name of ['ruflo', '@mfjjs/ruflo-setup']) {
     const ver = pkgMap[name];
     if (ver) { lines.push(`  ${OK} ${name}${typeof ver === 'string' ? `@${ver}` : ''}`); ok += 1; }
-    else { lines.push(`  ${MISS} ${name}  (install: npm install -g ${name})`); }
+    else { lines.push(`  ${MISS} ${name}  (install: pnpm add -g ${name})`); }
   }
   return { lines, ok, total: 2 };
 }
@@ -268,7 +261,7 @@ export async function runStatus({ cwd, packageRoot }) {
 
     const layers = [
       { title: 'Layer 0: Prerequisites', result: checkLayer0() },
-      { title: 'Layer 1: Global npm Packages', result: checkLayer1(pkgMap) },
+      { title: 'Layer 1: Global Packages', result: checkLayer1(pkgMap) },
       { title: 'Layer 2: Optional Packages (WASM/ML)  — enables AI features', result: checkLayer2(pkgMap) },
       { title: 'Layer 3: MCP Servers (.mcp.json)', result: checkLayer3(mcpJson) },
       { title: 'Layer 4: MCP Tool Groups', result: checkLayer4(mcpJson) },

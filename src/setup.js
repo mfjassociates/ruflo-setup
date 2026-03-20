@@ -171,6 +171,29 @@ function isAlreadyConfigured(cwd) {
   return pathExists(path.join(cwd, '.mcp.json')) || pathExists(path.join(cwd, '.claude', 'settings.json'));
 }
 
+function getCurrentVersion(packageRoot) {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8'));
+    return pkg.version || '0.0.0';
+  } catch {
+    return '0.0.0';
+  }
+}
+
+function getLatestVersion() {
+  try {
+    const result = spawnSync('pnpm', ['view', '@mfjjs/ruflo-setup', 'version'], {
+      stdio: ['ignore', 'pipe', 'ignore'],
+      shell: process.platform === 'win32',
+      timeout: 8000
+    });
+    if (result.status !== 0 || result.error) return null;
+    return (result.stdout || '').toString().trim() || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function runSetup({
   cwd,
   packageRoot,
@@ -188,6 +211,24 @@ export async function runSetup({
     logLine('[DRY RUN - no changes will be made]');
   }
   logLine('');
+
+  // Check if a newer version of ruflo-setup itself is available.
+  if (!dryRun && !yes) {
+    const currentVersion = getCurrentVersion(packageRoot);
+    const latestVersion = getLatestVersion();
+    if (latestVersion && !semverGte(parseSemver(currentVersion), parseSemver(latestVersion))) {
+      logLine(`A newer version of ruflo-setup is available: ${latestVersion} (you have ${currentVersion}).`);
+      logLine('It is best to always have the latest version before running setup.');
+      const doUpdate = await confirm('Update @mfjjs/ruflo-setup now? [y/N] ');
+      if (doUpdate) {
+        runUpdate({ dryRun: false });
+        logLine('');
+        logLine('Please re-run ruflo-setup to continue with the updated version.');
+        return;
+      }
+      logLine('');
+    }
+  }
 
   logLine('Preflight: Syncing global /ruflo-setup command template ...');
   const preflightCommandResult = syncGlobalCommandTemplate({ packageRoot, dryRun });
@@ -309,4 +350,31 @@ export function runCleanup({ dryRun = false } = {}) {
 
   logLine('');
   logLine('Cleanup complete.');
+}
+
+export function runUpdate({ dryRun = false } = {}) {
+  logLine('');
+  logLine('Ruflo Setup Update');
+  logLine('');
+
+  if (dryRun) {
+    logLine('[DRY RUN] Would run: pnpm add -g @mfjjs/ruflo-setup@latest');
+    logLine('');
+    return;
+  }
+
+  ensurePnpmAvailable();
+
+  logLine('Updating @mfjjs/ruflo-setup to latest...');
+  const result = spawnSync('pnpm', ['add', '-g', '@mfjjs/ruflo-setup@latest'], {
+    stdio: 'inherit',
+    shell: process.platform === 'win32'
+  });
+
+  if (result.status !== 0) {
+    throw new Error(`pnpm add -g @mfjjs/ruflo-setup@latest failed with exit code ${result.status}`);
+  }
+
+  logLine('');
+  logLine('Update complete. Re-run ruflo-setup to continue with the updated version.');
 }

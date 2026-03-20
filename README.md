@@ -11,6 +11,20 @@ Cross-platform npm CLI to bootstrap a project with Ruflo on Windows and Linux.
 - Package name: `@mfjjs/ruflo-setup`
 - Command name: `ruflo-setup`
 - Platform support: Windows and Linux (plus macOS by default)
+
+## 💡 Why You Need This
+
+If you're working on:
+
+* A brownfield application that never had RuFlow configured, or
+* A brand‑new project that hasn't been set up with RuFlow yet,
+
+…then you currently have to configure RuFlow manually in each project. That means recreating the same structure, wiring, and boilerplate over and over.
+
+`ruflo-setup` eliminates all of that. When you run it inside a project directory, it automatically generates the required RuFlow scaffolding — including all the files that belong in the `.claude/` folder — so every project starts from a clean, consistent baseline.
+
+You only need to do this once per project. Just run the command and you're ready to go.
+
 ## 📋 Requirements
 <details>
   <summary>Click to toggle visibility</summary>
@@ -41,43 +55,50 @@ corepack prepare pnpm@latest --activate
 
 ## 📦 Installation
 
-```powershell
+Install the CLI globally once:
+
+```bash
 pnpm add -g @mfjjs/ruflo-setup
-ruflo-setup cleanup
 ```
-
-> **Why run `cleanup` first?** If you previously installed any Ruflo packages via `npm install -g` (e.g. `ruflo`, `claude-flow`, `ruv-swarm`), those npm-global copies can shadow or conflict with the pnpm-managed versions. `ruflo-setup cleanup` removes them from the npm global registry before setup runs, giving you a clean slate.
-
-## 💡 Why You Need This
-
-If you’re working on:
-
-* A brownfield application that never had RuFlow configured, or
-* A brand‑new project that hasn’t been set up with RuFlow yet,
-
-…then you currently have to configure RuFlow manually in each project. That means recreating the same structure, wiring, and boilerplate over and over.
-
-The new  command eliminates all of that. When you run it inside a project, it automatically generates the required RuFlow scaffolding — including all the files that belong in the  folder — so every project starts from a clean, consistent baseline.
-
-You only need to do this once in each folder.  Just run the command and you’re ready to go.
 
 ## 🚀 Usage
 
-### Cleanup
-Remove any previous npm global installs of Ruflo packages that could conflict with the pnpm-managed versions:
+### Setup
+
+**First, change to your project directory**, then run:
 
 ```bash
-ruflo-setup cleanup
+ruflo-setup
 ```
 
-This uninstalls `ruflo`, `@mfjjs/ruflo-setup`, `ruflo-setup`, `claude-flow`, `@claude-flow/cli`, and `ruv-swarm` from the **npm** global registry. It does not touch pnpm globals. Run this before setup if you suspect stale npm globals are shadowing the pnpm-installed binaries.
+That's it for most users. The command will:
+1. Check for a newer version of itself and offer to update before proceeding
+2. Install `ruflo@latest` globally and run `ruflo init --full` to scaffold your project
+3. Write a platform-aware `.mcp.json`
+4. Install a global Claude Code `SessionStart` hook
+
+Additional options:
 
 ```bash
-# preview what would be removed without making changes
-ruflo-setup cleanup --dry-run
+# non-interactive (skip all prompts)
+ruflo-setup --yes
+
+# preview what would happen without making any changes
+ruflo-setup --dry-run
+
+# skip the ruflo global install step
+ruflo-setup --skip-init
+
+# skip global hook installation
+ruflo-setup --no-hooks
+
+# hook operations
+ruflo-setup hooks install
+ruflo-setup hooks status
 ```
 
 ### Status
+
 Check whether all Ruflo feature layers (0–8) are enabled in the current project:
 
 ```bash
@@ -87,7 +108,8 @@ ruflo-setup status
 This prints a layer-by-layer report showing which features are active — prerequisites, global packages, optional WASM/ML packages, MCP servers, tool groups, environment variables, project scaffolding, and the Docker chat UI stack.
 
 ### Bootstrap
-Use this once if you want Claude Code to expose the `/ruflo-setup` command globally.
+
+Use this once if you want Claude Code to expose the `/ruflo-setup` command globally, so you can run it from inside Claude Code chat without using the shell.
 
 ```bash
 ruflo-setup hooks init
@@ -95,27 +117,34 @@ ruflo-setup hooks init
 
 After that, when you open Claude Code in a project that does not already have Ruflo configured, you can run [**/ruflo-setup**](noop:) to start the setup flow.
 
-### Setup
-Use these commands when you want to run the setup directly from a shell.
+### Update
 
-From the target project directory, run one of the following:
+Update `@mfjjs/ruflo-setup` itself to the latest published version:
 
 ```bash
-# full setup
-ruflo-setup
+ruflo-setup update
+```
 
-# non-interactive
-ruflo-setup --yes
+It is best to always have the latest version before running setup. When you run `ruflo-setup` without arguments it automatically checks for a newer version and will prompt you to update if one is found, so in most cases you will not need to run this manually.
 
-# preview only
-ruflo-setup --dry-run --skip-init
+```bash
+# preview without making changes
+ruflo-setup update --dry-run
+```
 
-# skip global hook install
-ruflo-setup --no-hooks
+### Cleanup
 
-# hook operations
-ruflo-setup hooks install
-ruflo-setup hooks status
+If you previously installed any Ruflo packages via `npm install -g`, those npm-global copies can shadow or conflict with the pnpm-managed versions. Run this to remove them and give yourself a clean slate:
+
+```bash
+ruflo-setup cleanup
+```
+
+This uninstalls `ruflo`, `@mfjjs/ruflo-setup`, `ruflo-setup`, `claude-flow`, `@claude-flow/cli`, and `ruv-swarm` from the **npm** global registry only — it does not touch pnpm globals.
+
+```bash
+# preview what would be removed without making changes
+ruflo-setup cleanup --dry-run
 ```
 
 ## 🗂️ Project structure
@@ -154,12 +183,17 @@ Flow:
 3. `bin/ruflo-setup.js` forwards args to `runCli(...)`.
 4. `src/cli.js` parses command and flags.
 5. `src/setup.js` runs setup steps:
+	 - checks for a newer version of itself and prompts to update
 	 - optional `pnpm add -g ruflo@latest` then `ruflo init --full`
 	 - writes platform-aware `.mcp.json`
 	 - copies `templates/CLAUDE.md`
 	 - installs global SessionStart hook (unless skipped)
 
 When called as `ruflo-setup status`, step 5 dispatches to `src/status.js` which checks all layers (0–8) and prints a feature status report.
+
+When called as `ruflo-setup update`, it runs `pnpm add -g @mfjjs/ruflo-setup@latest` to update the tool itself.
+
+When called as `ruflo-setup cleanup`, it removes Ruflo packages from the npm global registry to eliminate conflicts with pnpm-managed versions.
 
 ## 🛠️ Local development with pnpm
 
