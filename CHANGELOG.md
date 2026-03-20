@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.7](///compare/v0.2.6...v0.2.7) (2026-03-20)
+
+
+### Features
+
+* **cli:** add update command to upgrade ruflo-setup to the latest version 569bc0b
+
 ### [0.2.6](///compare/v0.2.5...v0.2.6) (2026-03-20)
 
 
