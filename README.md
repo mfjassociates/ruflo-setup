@@ -16,7 +16,7 @@ Cross-platform npm CLI to bootstrap a project with Ruflo on Windows and Linux.
   <summary>Click to toggle visibility</summary>
 
 - Node.js 20+
-- pnpm available on PATH
+- pnpm **10.32.1 or higher** available on PATH
 
 Quickest pnpm install by platform:
 
@@ -42,8 +42,11 @@ corepack prepare pnpm@latest --activate
 ## 📦 Installation
 
 ```powershell
-pnpm -i -g @mfjjs/ruflo-setup
+pnpm add -g @mfjjs/ruflo-setup
+ruflo-setup cleanup
 ```
+
+> **Why run `cleanup` first?** If you previously installed any Ruflo packages via `npm install -g` (e.g. `ruflo`, `claude-flow`, `ruv-swarm`), those npm-global copies can shadow or conflict with the pnpm-managed versions. `ruflo-setup cleanup` removes them from the npm global registry before setup runs, giving you a clean slate.
 
 ## 💡 Why You Need This
 
@@ -59,6 +62,20 @@ The new  command eliminates all of that. When you run it inside a project, it au
 You only need to do this once in each folder.  Just run the command and you’re ready to go.
 
 ## 🚀 Usage
+
+### Cleanup
+Remove any previous npm global installs of Ruflo packages that could conflict with the pnpm-managed versions:
+
+```bash
+ruflo-setup cleanup
+```
+
+This uninstalls `ruflo`, `@mfjjs/ruflo-setup`, `ruflo-setup`, `claude-flow`, `@claude-flow/cli`, and `ruv-swarm` from the **npm** global registry. It does not touch pnpm globals. Run this before setup if you suspect stale npm globals are shadowing the pnpm-installed binaries.
+
+```bash
+# preview what would be removed without making changes
+ruflo-setup cleanup --dry-run
+```
 
 ### Status
 Check whether all Ruflo feature layers (0–8) are enabled in the current project:
