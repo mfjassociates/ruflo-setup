@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.6](///compare/v0.2.5...v0.2.6) (2026-03-20)
+
+
+### Features
+
+* **cli:** add cleanup command to remove Ruflo packages from npm global registry. 5151c70
+
 ### [0.2.5](///compare/v0.2.4...v0.2.5) (2026-03-17)
 
 ### [0.2.4](https://gitlab.mfj.local:8022/mario/ruflo-setup/compare/v0.2.3...v0.2.4) (2026-03-17)
