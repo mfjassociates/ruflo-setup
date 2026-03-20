@@ -33,30 +33,49 @@ function getPnpmInstallSuggestions(platform) {
   ];
 }
 
+const MIN_PNPM_VERSION = '10.32.1';
+
+function parseSemver(str) {
+  const [major = 0, minor = 0, patch = 0] = str.trim().split('.').map(Number);
+  return { major, minor, patch };
+}
+
+function semverGte(a, b) {
+  if (a.major !== b.major) return a.major > b.major;
+  if (a.minor !== b.minor) return a.minor > b.minor;
+  return a.patch >= b.patch;
+}
+
 function ensurePnpmAvailable() {
   const check = spawnSync('pnpm', ['--version'], {
-    stdio: 'ignore',
+    stdio: ['ignore', 'pipe', 'ignore'],
     shell: process.platform === 'win32'
   });
 
-  if (check.status === 0 && !check.error) {
-    return;
+  if (check.status !== 0 || check.error) {
+    const platformLabel = process.platform === 'win32'
+      ? 'Windows'
+      : process.platform === 'darwin'
+        ? 'macOS'
+        : 'Linux';
+    const suggestions = getPnpmInstallSuggestions(process.platform)
+      .map((command) => `  - ${command}`)
+      .join('\n');
+
+    throw new Error(
+      `pnpm is required but was not found in PATH.\n` +
+      `Install pnpm, then re-run ruflo-setup.\n` +
+      `Quick install options for ${platformLabel}:\n${suggestions}`
+    );
   }
 
-  const platformLabel = process.platform === 'win32'
-    ? 'Windows'
-    : process.platform === 'darwin'
-      ? 'macOS'
-      : 'Linux';
-  const suggestions = getPnpmInstallSuggestions(process.platform)
-    .map((command) => `  - ${command}`)
-    .join('\n');
-
-  throw new Error(
-    `pnpm is required but was not found in PATH.\n` +
-    `Install pnpm, then re-run ruflo-setup.\n` +
-    `Quick install options for ${platformLabel}:\n${suggestions}`
-  );
+  const version = (check.stdout || '').toString().trim();
+  if (!semverGte(parseSemver(version), parseSemver(MIN_PNPM_VERSION))) {
+    throw new Error(
+      `pnpm ${MIN_PNPM_VERSION} or higher is required, but found ${version}.\n` +
+      `Upgrade with: pnpm self-update`
+    );
+  }
 }
 
 function runPnpmInit({ force, cwd, dryRun }) {
@@ -67,20 +86,44 @@ function runPnpmInit({ force, cwd, dryRun }) {
 
   if (dryRun) {
     logLine(`  [DRY RUN] Would run: pnpm add -g ruflo@latest`);
+    logLine(`  [DRY RUN] Would run: pnpm approve-builds -g --all  (if changes detected)`);
     logLine(`  [DRY RUN] Would run: ruflo ${initArgs.join(' ')}`);
     return;
   }
 
   ensurePnpmAvailable();
 
+  // Capture stdout to detect whether pnpm installed/updated anything.
+  // Progress spinners go to stderr (still shown to user); stdout has the summary.
   const install = spawnSync('pnpm', ['add', '-g', 'ruflo@latest'], {
     cwd,
-    stdio: 'inherit',
+    stdio: ['inherit', 'pipe', 'inherit'],
     shell: process.platform === 'win32'
   });
 
+  const installOutput = (install.stdout || '').toString();
+  if (installOutput) {
+    process.stdout.write(installOutput);
+  }
+
   if (install.status !== 0) {
     throw new Error(`pnpm add -g ruflo@latest failed with exit code ${install.status}`);
+  }
+
+  // pnpm prints a "Packages:" summary line and "+ pkg version" lines when
+  // something is actually installed or updated. When already up to date the
+  // stdout is empty or contains only "Already up to date".
+  const somethingChanged = /Packages:/i.test(installOutput) || /^\+\s/m.test(installOutput);
+  if (somethingChanged) {
+    logLine('  Changes detected — running pnpm approve-builds -g --all ...');
+    const approve = spawnSync('pnpm', ['approve-builds', '-g', '--all'], {
+      cwd,
+      stdio: 'inherit',
+      shell: process.platform === 'win32'
+    });
+    if (approve.status !== 0) {
+      throw new Error(`pnpm approve-builds -g --all failed with exit code ${approve.status}`);
+    }
   }
 
   const run = spawnSync('ruflo', initArgs, {
@@ -232,4 +275,38 @@ export async function runSetup({
   logLine('  1. Edit CLAUDE.md for project-specific Build & Test commands');
   logLine('  2. Run: claude');
   logLine('  3. Verify hooks: ruflo-setup hooks status');
+}
+
+const CLEANUP_NPM_PACKAGES = [
+  'ruflo',
+  '@mfjjs/ruflo-setup',
+  'ruflo-setup',
+  'claude-flow',
+  '@claude-flow/cli',
+  'ruv-swarm'
+];
+
+export function runCleanup({ dryRun = false } = {}) {
+  logLine('');
+  logLine('Ruflo Cleanup — removing from npm global registry');
+  logLine(`Packages: ${CLEANUP_NPM_PACKAGES.join(', ')}`);
+  logLine('');
+
+  if (dryRun) {
+    logLine(`  [DRY RUN] Would run: npm uninstall -g ${CLEANUP_NPM_PACKAGES.join(' ')}`);
+    logLine('');
+    return;
+  }
+
+  const result = spawnSync('npm', ['uninstall', '-g', ...CLEANUP_NPM_PACKAGES], {
+    stdio: 'inherit',
+    shell: process.platform === 'win32'
+  });
+
+  if (result.status !== 0) {
+    throw new Error(`npm uninstall -g failed with exit code ${result.status}`);
+  }
+
+  logLine('');
+  logLine('Cleanup complete.');
 }
