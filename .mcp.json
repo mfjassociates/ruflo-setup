@@ -4,8 +4,8 @@
       "command": "cmd",
       "args": [
         "/c",
-        "npx",
-        "-y",
+        "pnpm",
+        "dlx",
         "@claude-flow/cli@latest",
         "mcp",
         "start"
@@ -28,8 +28,8 @@
       "command": "cmd",
       "args": [
         "/c",
-        "npx",
-        "-y",
+        "pnpm",
+        "dlx",
         "ruv-swarm",
         "mcp",
         "start"
@@ -43,8 +43,8 @@
       "command": "cmd",
       "args": [
         "/c",
-        "npx",
-        "-y",
+        "pnpm",
+        "dlx",
         "flow-nexus@latest",
         "mcp",
         "start"

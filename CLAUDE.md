@@ -1,4 +1,4 @@
-# Claude Code Configuration - Claude Flow V3
+# Claude Code Configuration - RuFlo V3
 
 ## Behavioral Rules (Always Enforced)
 
@@ -40,7 +40,6 @@
 
 ## Build & Test
 
-<!-- TODO: Replace with this project's actual build/test/lint commands -->
 ```bash
 # Build
 npm run build
@@ -61,7 +60,7 @@ npm run lint
 - NEVER commit .env files or any file containing secrets
 - Always validate user input at system boundaries
 - Always sanitize file paths to prevent directory traversal
-- Run `ruflo security scan` after security-related changes
+- Run `npx @claude-flow/cli@latest security scan` after security-related changes
 
 ## Concurrency: 1 MESSAGE = ALL RELATED OPERATIONS
 
@@ -100,7 +99,7 @@ npm run lint
 - Keep shared memory namespace for all agents
 
 ```bash
-ruflo swarm init --topology hierarchical --max-agents 8 --strategy specialized
+npx @claude-flow/cli@latest swarm init --topology hierarchical --max-agents 8 --strategy specialized
 ```
 
 ## Swarm Execution Rules
@@ -129,11 +128,11 @@ ruflo swarm init --topology hierarchical --max-agents 8 --strategy specialized
 ### Quick CLI Examples
 
 ```bash
-ruflo init --wizard
-ruflo agent spawn -t coder --name my-coder
-ruflo swarm init --v3-mode
-ruflo memory search --query "authentication patterns"
-ruflo doctor --fix
+npx @claude-flow/cli@latest init --wizard
+npx @claude-flow/cli@latest agent spawn -t coder --name my-coder
+npx @claude-flow/cli@latest swarm init --v3-mode
+npx @claude-flow/cli@latest memory search --query "authentication patterns"
+npx @claude-flow/cli@latest doctor --fix
 ```
 
 ## Available Agents (60+ Types)
@@ -157,24 +156,24 @@ ruflo doctor --fix
 
 ```bash
 # Store (REQUIRED: --key, --value; OPTIONAL: --namespace, --ttl, --tags)
-ruflo memory store --key "pattern-auth" --value "JWT with refresh" --namespace patterns
+npx @claude-flow/cli@latest memory store --key "pattern-auth" --value "JWT with refresh" --namespace patterns
 
 # Search (REQUIRED: --query; OPTIONAL: --namespace, --limit, --threshold)
-ruflo memory search --query "authentication patterns"
+npx @claude-flow/cli@latest memory search --query "authentication patterns"
 
 # List (OPTIONAL: --namespace, --limit)
-ruflo memory list --namespace patterns --limit 10
+npx @claude-flow/cli@latest memory list --namespace patterns --limit 10
 
 # Retrieve (REQUIRED: --key; OPTIONAL: --namespace)
-ruflo memory retrieve --key "pattern-auth" --namespace patterns
+npx @claude-flow/cli@latest memory retrieve --key "pattern-auth" --namespace patterns
 ```
 
 ## Quick Setup
 
 ```bash
-ruflo init --full
-ruflo daemon start
-ruflo doctor --fix
+claude mcp add claude-flow -- npx -y @claude-flow/cli@latest
+npx @claude-flow/cli@latest daemon start
+npx @claude-flow/cli@latest doctor --fix
 ```
 
 ## Claude Code vs CLI Tools

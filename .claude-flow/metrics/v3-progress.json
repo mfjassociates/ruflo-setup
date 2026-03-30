@@ -1,6 +1,6 @@
 {
   "version": "3.0.0",
-  "initialized": "2026-03-10T02:52:41.873Z",
+  "initialized": "2026-03-27T23:30:04.834Z",
   "domains": {
     "completed": 0,
     "total": 5,
@@ -22,5 +22,5 @@
     "patternsLearned": 0,
     "sessionsCompleted": 0
   },
-  "_note": "Metrics will update as you use Claude Flow. Run: npx @claude-flow/cli@latest daemon start"
+  "_note": "Metrics will update as you use Ruflo. Run: npx ruflo@latest daemon start"
 }
