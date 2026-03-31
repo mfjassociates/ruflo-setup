@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.8](///compare/v0.2.7...v0.2.8) (2026-03-31)
+
+
+### Features
+
+* **docs:** add related documentation b67343a
+* **docs:** add RuFlo enabled session notes and usage checklist bd9d96a
+* enhance setup process with .gitignore updates and cross-platform compatibility for .mcp.json 4b44558
+
+
+### Bug Fixes
+
+* update toPlatformMcpConfig to use npx instead of pnpm for cross-platform compatibility e7cf99f
+
 ### [0.2.7](///compare/v0.2.6...v0.2.7) (2026-03-20)
 
 
