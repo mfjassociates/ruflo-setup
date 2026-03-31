@@ -37,9 +37,10 @@ Runs `pnpm add -g @mfjjs/ruflo-setup` then `ruflo-setup` which:
    - `.claude/agents/` — 120+ agent definitions
    - `.claude/skills/` — 30+ skill definitions
    - `.claude/commands/` — slash commands
-2. Writes a platform-aware `.mcp.json` (MCP server registration for claude-flow, ruv-swarm, flow-nexus)
-3. Installs a global `SessionStart` hook in `~/.claude/settings.json` that warns when Ruflo is not configured
-4. May refresh `~/.claude/commands/ruflo-setup.md` from the latest packaged template when differences are detected
+2. Writes a platform-aware `.mcp.json` (MCP server registration for claude-flow, ruv-swarm, flow-nexus; servers invoked via `npx` for cross-platform compatibility)
+3. Adds `.mcp.json` and `.claude/settings.json` to the project's `.gitignore`
+4. Installs a global `SessionStart` hook in `~/.claude/settings.json` that warns when Ruflo is not configured
+5. May refresh `~/.claude/commands/ruflo-setup.md` from the latest packaged template when differences are detected
 
 ## Options
 
@@ -76,7 +77,8 @@ When the user runs /ruflo-setup:
    ```bash
    ruflo-setup
    ```
-6. Report what was installed and remind the user to restart Claude Code to load the new MCP servers
+6. Ensure `.mcp.json` and `.claude/settings.json` are in the project's `.gitignore` (ruflo-setup does this automatically, but verify if using `--skip-init`)
+7. Report what was installed and remind the user to restart Claude Code to load the new MCP servers
 
 ### cleanup
 

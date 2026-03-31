@@ -74,8 +74,9 @@ ruflo-setup
 That's it for most users. The command will:
 1. Check for a newer version of itself and offer to update before proceeding
 2. Install `ruflo@latest` globally and run `ruflo init --full` to scaffold your project
-3. Write a platform-aware `.mcp.json`
-4. Install a global Claude Code `SessionStart` hook
+3. Write a platform-aware `.mcp.json` (MCP servers use `npx` for cross-platform compatibility)
+4. Add `.mcp.json` and `.claude/settings.json` to the project's `.gitignore`
+5. Install a global Claude Code `SessionStart` hook
 
 Additional options:
 
@@ -152,7 +153,7 @@ ruflo-setup cleanup --dry-run
 - `package.json`: npm metadata, scripts, and `bin` mapping
 - `bin/ruflo-setup.js`: executable entry file the shell runs
 - `src/cli.js`: command router and argument handling
-- `src/setup.js`: setup workflow (`init`, `.mcp.json`, template copy)
+- `src/setup.js`: setup workflow (`init`, `.mcp.json`, `.gitignore`, template copy)
 - `src/status.js`: layer-by-layer feature status checker (Layers 0–8)
 - `src/hooks.js`: global `check-ruflo` hook install/status
 - `src/utils.js`: reusable filesystem and argument helpers
@@ -185,7 +186,8 @@ Flow:
 5. `src/setup.js` runs setup steps:
 	 - checks for a newer version of itself and prompts to update
 	 - optional `pnpm add -g ruflo@latest` then `ruflo init --full`
-	 - writes platform-aware `.mcp.json`
+	 - writes platform-aware `.mcp.json` (MCP servers invoked via `npx` for cross-platform compatibility)
+	 - adds `.mcp.json` and `.claude/settings.json` to the project's `.gitignore`
 	 - copies `templates/CLAUDE.md`
 	 - installs global SessionStart hook (unless skipped)
 

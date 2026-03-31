@@ -167,6 +167,36 @@ function syncGlobalCommandTemplate({ packageRoot, dryRun }) {
   return { dest, changed, operation };
 }
 
+function updateGitignore({ cwd, dryRun }) {
+  const gitignorePath = path.join(cwd, '.gitignore');
+  const entries = ['.mcp.json', '.claude/settings.json'];
+
+  if (dryRun) {
+    logLine(`  [DRY RUN] Would ensure ${gitignorePath} contains: ${entries.join(', ')}`);
+    return;
+  }
+
+  let content = pathExists(gitignorePath) ? fs.readFileSync(gitignorePath, 'utf8') : '';
+  const lines = content.split('\n');
+  const added = [];
+
+  for (const entry of entries) {
+    if (!lines.some((line) => line.trim() === entry)) {
+      added.push(entry);
+    }
+  }
+
+  if (added.length === 0) {
+    logLine(`  .gitignore already contains required entries.`);
+    return;
+  }
+
+  const suffix = content.length > 0 && !content.endsWith('\n') ? '\n' : '';
+  content = content + suffix + added.join('\n') + '\n';
+  fs.writeFileSync(gitignorePath, content, 'utf8');
+  logLine(`  Added to .gitignore: ${added.join(', ')}`);
+}
+
 function isAlreadyConfigured(cwd) {
   return pathExists(path.join(cwd, '.mcp.json')) || pathExists(path.join(cwd, '.claude', 'settings.json'));
 }
@@ -270,8 +300,12 @@ export async function runSetup({
   writeMcpJson({ cwd, dryRun });
   logLine('');
 
+  logLine('Step 3: Updating .gitignore ...');
+  updateGitignore({ cwd, dryRun });
+  logLine('');
+
   if (!noHooks) {
-    logLine('Step 3: Installing global SessionStart check-ruflo hook ...');
+    logLine('Step 4: Installing global SessionStart check-ruflo hook ...');
     const hookResult = installGlobalCheckRufloHook({ packageRoot, dryRun });
     if (hookResult.inserted) {
       logLine(`  Hook installed in: ${hookResult.settingsPath}`);
@@ -283,11 +317,11 @@ export async function runSetup({
     }
     logLine('');
   } else {
-    logLine('Step 3: Skipped hook installation (--no-hooks).');
+    logLine('Step 4: Skipped hook installation (--no-hooks).');
     logLine('');
   }
 
-  logLine('Step 4: Installing global /ruflo-setup command ...');
+  logLine('Step 5: Installing global /ruflo-setup command ...');
   if (dryRun) {
     if (preflightCommandResult.changed) {
       logLine(`  [DRY RUN] Would ${preflightCommandResult.operation}: ${preflightCommandResult.dest}`);
