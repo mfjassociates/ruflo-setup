@@ -72,11 +72,11 @@ export function parseArgs(argv) {
 
 export function toPlatformMcpConfig(platform) {
   const isWindows = platform === 'win32';
-  const command = isWindows ? 'cmd' : 'pnpm';
-  const pnpmArgs = isWindows ? ['/c', 'pnpm', 'dlx'] : ['dlx'];
+  const command = isWindows ? 'cmd' : 'npx';
+  const npxArgs = isWindows ? ['/c', 'npx', '-y'] : ['-y'];
 
   const makeArgs = (pkg, extraArgs) => {
-    return [...pnpmArgs, pkg, ...extraArgs];
+    return [...npxArgs, pkg, ...extraArgs];
   };
 
   return {
