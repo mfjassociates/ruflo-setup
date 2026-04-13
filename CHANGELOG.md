@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.10](///compare/v0.2.9...v0.2.10) (2026-04-13)
+
+
+### Features
+
+* enhance dry run output for pnpm commands and remove existing global installs to avoid cache issues 2647af9
+
 ### [0.2.9](///compare/v0.2.8...v0.2.9) (2026-03-31)
 
 ### [0.2.8](///compare/v0.2.7...v0.2.8) (2026-03-31)
