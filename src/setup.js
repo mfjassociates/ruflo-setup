@@ -85,6 +85,7 @@ function runPnpmInit({ force, cwd, dryRun }) {
   }
 
   if (dryRun) {
+    logLine(`  [DRY RUN] Would run: pnpm remove -g ruflo`);
     logLine(`  [DRY RUN] Would run: pnpm add -g ruflo@latest`);
     logLine(`  [DRY RUN] Would run: pnpm approve-builds -g --all  (if changes detected)`);
     logLine(`  [DRY RUN] Would run: ruflo ${initArgs.join(' ')}`);
@@ -92,6 +93,13 @@ function runPnpmInit({ force, cwd, dryRun }) {
   }
 
   ensurePnpmAvailable();
+
+  logLine('  Removing existing ruflo global install to avoid cache quirks...');
+  spawnSync('pnpm', ['remove', '-g', 'ruflo'], {
+    cwd,
+    stdio: 'inherit',
+    shell: process.platform === 'win32'
+  });
 
   // Capture stdout to detect whether pnpm installed/updated anything.
   // Progress spinners go to stderr (still shown to user); stdout has the summary.
@@ -392,6 +400,7 @@ export function runUpdate({ dryRun = false } = {}) {
   logLine('');
 
   if (dryRun) {
+    logLine('[DRY RUN] Would run: pnpm remove -g @mfjjs/ruflo-setup');
     logLine('[DRY RUN] Would run: pnpm add -g @mfjjs/ruflo-setup@latest');
     logLine('');
     return;
@@ -400,6 +409,12 @@ export function runUpdate({ dryRun = false } = {}) {
   ensurePnpmAvailable();
 
   logLine('Updating @mfjjs/ruflo-setup to latest...');
+  logLine('  Removing existing @mfjjs/ruflo-setup global install to avoid cache quirks...');
+  spawnSync('pnpm', ['remove', '-g', '@mfjjs/ruflo-setup'], {
+    stdio: 'inherit',
+    shell: process.platform === 'win32'
+  });
+
   const result = spawnSync('pnpm', ['add', '-g', '@mfjjs/ruflo-setup@latest'], {
     stdio: 'inherit',
     shell: process.platform === 'win32'
