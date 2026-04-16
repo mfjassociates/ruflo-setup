@@ -1,5 +1,6 @@
 {
-  "scripts": {
-    "postbump": "node scripts/sync-wrapper-version.js && git add ruflo-setup/package.json"
-  }
+  "bumpFiles": [
+    { "filename": "package.json", "type": "json" },
+    { "filename": "ruflo-setup/package.json", "type": "json" }
+  ]
 }
