@@ -142,7 +142,7 @@ test('status outputs all layer headers', async () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
   const { output } = await captureStdout(() => runCli(['status'], tempDir));
   assert.match(output, /Layer 0: Prerequisites/);
-  assert.match(output, /Layer 1: Global npm Packages/);
+  assert.match(output, /Layer 1: Global Packages/);
   assert.match(output, /Layer 2: Optional Packages/);
   assert.match(output, /Layer 3: MCP Servers/);
   assert.match(output, /Layer 4: MCP Tool Groups/);
