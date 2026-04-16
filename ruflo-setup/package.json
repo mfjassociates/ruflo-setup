@@ -29,5 +29,8 @@
     "url": "https://github.com/mfjassociates/ruflo-setup/issues"
   },
   "homepage": "https://github.com/mfjassociates/ruflo-setup#readme",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "prepublishOnly": "node -e \"require('fs').copyFileSync('../README.md', 'README.md')\""
+  }
 }
