@@ -1,0 +1,33 @@
+{
+  "name": "ruflo-setup",
+  "version": "0.2.10",
+  "description": "Thin wrapper for @mfjjs/ruflo-setup — cross-platform setup CLI for Ruflo + Claude Flow projects",
+  "type": "module",
+  "bin": {
+    "ruflo-setup": "./bin/ruflo-setup.js"
+  },
+  "dependencies": {
+    "@mfjjs/ruflo-setup": "latest"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [
+    "ruflo",
+    "claude-flow",
+    "cli",
+    "setup"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mfjassociates/ruflo-setup.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mfjassociates/ruflo-setup/issues"
+  },
+  "homepage": "https://github.com/mfjassociates/ruflo-setup#readme",
+  "license": "MIT"
+}

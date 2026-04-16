@@ -21,7 +21,10 @@
     "lint": "node --check ./src/cli.js && node --check ./src/setup.js && node --check ./src/hooks.js && node --check ./src/utils.js && node --check ./bin/ruflo-setup.js",
     "test": "node --test tests/cli.test.mjs",
     "test:cli": "node ./bin/ruflo-setup.js --dry-run --skip-init --no-hooks --yes",
-    "pack:dry": "pnpm pack --json"
+    "pack:dry": "pnpm pack --json",
+    "postbump": "node scripts/sync-wrapper-version.js",
+    "version": "node scripts/sync-wrapper-version.js && git add ruflo-setup/package.json",
+    "publish:all": "pnpm publish && pnpm publish --prefix ruflo-setup"
   },
   "keywords": [
     "ruflo",
