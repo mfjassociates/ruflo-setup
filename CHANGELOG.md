@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.12](///compare/v0.2.11...v0.2.12) (2026-04-16)
+
+
+### Features
+
+* add .versionrc.json for postbump script and update package version to 0.2.11 78be1fb
+
+
+### Bug Fixes
+
+* update .gitignore to include README.md and copy it to the ruflo-setup thin wrapper 86b6391
+
 ### [0.2.11](///compare/v0.2.10...v0.2.11) (2026-04-16)
 
 
