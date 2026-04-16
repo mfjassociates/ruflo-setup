@@ -1,5 +1,5 @@
 {
   "scripts": {
-    "postbump": "node scripts/sync-wrapper-version.js"
+    "postbump": "node scripts/sync-wrapper-version.js && git add ruflo-setup/package.json"
   }
 }
