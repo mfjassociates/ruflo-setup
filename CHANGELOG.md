@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.13](///compare/v0.2.12...v0.2.13) (2026-04-16)
+
+
+### Features
+
+* update postbump script to automatically add package.json and bump version to 0.2.12 24a9f15
+
 ### [0.2.12](///compare/v0.2.11...v0.2.12) (2026-04-16)
 
 
