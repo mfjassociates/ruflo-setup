@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.11](///compare/v0.2.10...v0.2.11) (2026-04-16)
+
+
+### Features
+
+* add sample prompts for creating ADR and implementation plans ead2f8c
+* add sync script for versioning and update package.json for ruflo-setup thin wrapper d4d1bae
+* add version checks for installed packages and enhance dry run output df86842
+* renamed the folder without spaces.  Best practice a415d02
+
 ### [0.2.10](///compare/v0.2.9...v0.2.10) (2026-04-13)
 
 
