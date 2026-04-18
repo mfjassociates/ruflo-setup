@@ -1,6 +1,6 @@
 {
   "name": "ruflo-setup",
-  "version": "0.2.14",
+  "version": "0.2.15",
   "description": "Thin wrapper for @mfjjs/ruflo-setup — cross-platform setup CLI for Ruflo + Claude Flow projects",
   "type": "module",
   "bin": {

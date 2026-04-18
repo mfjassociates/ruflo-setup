@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.15](///compare/v0.2.14...v0.2.15) (2026-04-18)
+
+
+### Features
+
+* add documentation for Ruflo Memory System 7f21cdc
+* add RUFLO_DEV env var to skip ruflo global install during local development 527650a
+
 ### [0.2.14](///compare/v0.2.13...v0.2.14) (2026-04-16)
 
 
