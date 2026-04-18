@@ -199,6 +199,16 @@ When called as `ruflo-setup cleanup`, it removes Ruflo packages from the npm glo
 
 ## 🛠️ Local development with pnpm
 
+### `RUFLO_DEV` — prevent ruflo from being overwritten during development
+
+When developing on ruflo itself, set `RUFLO_DEV=1` to prevent `ruflo-setup` from overwriting your local ruflo install with the published registry version:
+
+```bash
+RUFLO_DEV=1 ruflo-setup
+```
+
+With `RUFLO_DEV` set, the `pnpm add -g ruflo@latest` step (including the version check and cache-bust) is skipped entirely. `ruflo init --full` still runs against whatever ruflo is currently on disk. Unset the variable to resume normal update behaviour.
+
 From this repository root (`setup-ruflo/`):
 
 ```bash

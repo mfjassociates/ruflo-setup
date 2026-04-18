@@ -113,9 +113,13 @@ function runPnpmInit({ force, cwd, dryRun }) {
   }
 
   if (dryRun) {
-    logLine(`  [DRY RUN] Would run: pnpm add -g ruflo@latest`);
-    logLine(`  [DRY RUN] Would check: installed version vs registry latest`);
-    logLine(`  [DRY RUN] If installed < registry latest: pnpm remove -g ruflo && pnpm add -g ruflo@latest  (cache-bust)`);
+    if (process.env.RUFLO_DEV) {
+      logLine(`  [DRY RUN] RUFLO_DEV is set — would skip pnpm add -g ruflo@latest (using local copy)`);
+    } else {
+      logLine(`  [DRY RUN] Would run: pnpm add -g ruflo@latest`);
+      logLine(`  [DRY RUN] Would check: installed version vs registry latest`);
+      logLine(`  [DRY RUN] If installed < registry latest: pnpm remove -g ruflo && pnpm add -g ruflo@latest  (cache-bust)`);
+    }
     logLine(`  [DRY RUN] Would run: pnpm approve-builds -g --all  (if changes detected)`);
     logLine(`  [DRY RUN] Would run: ruflo ${initArgs.join(' ')}`);
     return;
@@ -123,6 +127,11 @@ function runPnpmInit({ force, cwd, dryRun }) {
 
   ensurePnpmAvailable();
 
+  let somethingChanged = false;
+
+  if (process.env.RUFLO_DEV) {
+    logLine('  RUFLO_DEV is set — skipping pnpm add -g ruflo@latest (using local copy).');
+  } else {
   // Capture stdout to detect whether pnpm installed/updated anything.
   // Progress spinners go to stderr (still shown to user); stdout has the summary.
   const install = spawnSync('pnpm', ['add', '-g', 'ruflo@latest'], {
@@ -143,7 +152,7 @@ function runPnpmInit({ force, cwd, dryRun }) {
   // pnpm prints a "Packages:" summary line and "+ pkg version" lines when
   // something is actually installed or updated. When already up to date the
   // stdout is empty or contains only "Already up to date".
-  let somethingChanged = /Packages:/i.test(installOutput) || /^\+\s/m.test(installOutput);
+  somethingChanged = /Packages:/i.test(installOutput) || /^\+\s/m.test(installOutput);
 
   // Check whether the installed version is behind the registry latest.
   // If so, pnpm served a stale cached copy — remove and re-add to force a fresh install.
@@ -170,6 +179,7 @@ function runPnpmInit({ force, cwd, dryRun }) {
     }
     somethingChanged = true;
   }
+  } // end RUFLO_DEV else
 
   if (somethingChanged) {
     logLine('  Changes detected — running pnpm approve-builds -g --all ...');
