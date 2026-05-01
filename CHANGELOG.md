@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.17](///compare/v0.2.16...v0.2.17) (2026-05-01)
+
+
+### Bug Fixes
+
+* idempotently gitignore .swarm/, ruvector.db, and .claude-flow generated files 42a70ed
+
 ### [0.2.16](///compare/v0.2.15...v0.2.16) (2026-05-01)
 
 
