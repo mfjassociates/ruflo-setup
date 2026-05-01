@@ -236,7 +236,7 @@ function syncGlobalCommandTemplate({ packageRoot, dryRun }) {
 
 function updateGitignore({ cwd, dryRun }) {
   const gitignorePath = path.join(cwd, '.gitignore');
-  const entries = ['.mcp.json', '.claude/settings.json'];
+  const entries = ['.mcp.json', '.claude/settings.json', '.swarm/', 'ruvector.db'];
 
   if (dryRun) {
     logLine(`  [DRY RUN] Would ensure ${gitignorePath} contains: ${entries.join(', ')}`);
@@ -349,6 +349,7 @@ export async function runSetup({
       logLine('Aborted. No changes made.');
       return;
     }
+    force = true;
   }
 
   if (!skipInit) {
