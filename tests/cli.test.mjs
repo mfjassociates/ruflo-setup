@@ -189,3 +189,79 @@ test('setup dry-run includes MCP tool group env vars in generated .mcp.json', as
     assert.equal(env.MCP_GROUP_AGENTIC_FLOW, 'true');
   });
 });
+
+test('setup dry-run includes all three new gitignore entries in Would-ensure line', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  await withTempHome(async () => {
+    const { code, output } = await captureStdout(() =>
+      runCli(['--dry-run', '--skip-init', '--no-hooks', '--yes'], tempDir)
+    );
+    assert.equal(code, 0);
+    assert.match(output, /Would ensure .* contains:.*\.claude-flow\/swarm\//);
+    assert.match(output, /Would ensure .* contains:.*\.claude-flow\/daemon-state\.json/);
+    assert.match(output, /Would ensure .* contains:.*\.claude-flow\/daemon\.pid/);
+  });
+});
+
+test('setup writes new gitignore entries to a fresh .gitignore', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  await withTempHome(async () => {
+    const { code } = await captureStdout(() =>
+      runCli(['--skip-init', '--no-hooks', '--yes'], tempDir)
+    );
+    assert.equal(code, 0);
+    const gitignorePath = path.join(tempDir, '.gitignore');
+    const content = fs.readFileSync(gitignorePath, 'utf8');
+    assert.ok(content.includes('.claude-flow/swarm/'), 'missing .claude-flow/swarm/');
+    assert.ok(content.includes('.claude-flow/daemon-state.json'), 'missing .claude-flow/daemon-state.json');
+    assert.ok(content.includes('.claude-flow/daemon.pid'), 'missing .claude-flow/daemon.pid');
+  });
+});
+
+test('setup does not duplicate new gitignore entries when already present', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  const gitignorePath = path.join(tempDir, '.gitignore');
+  // Pre-populate with all expected entries so nothing is added on first run
+  const existingEntries = [
+    '.mcp.json',
+    '.claude/settings.json',
+    '.swarm/',
+    'ruvector.db',
+    '.claude-flow/metrics/',
+    '.claude-flow/security/',
+    '.claude-flow/CAPABILITIES.md',
+    '.claude-flow/config.yaml',
+    '.claude-flow/swarm/',
+    '.claude-flow/daemon-state.json',
+    '.claude-flow/daemon.pid',
+  ].join('\n') + '\n';
+  fs.writeFileSync(gitignorePath, existingEntries, 'utf8');
+
+  await withTempHome(async () => {
+    const { code } = await captureStdout(() =>
+      runCli(['--skip-init', '--no-hooks', '--yes'], tempDir)
+    );
+    assert.equal(code, 0);
+    const content = fs.readFileSync(gitignorePath, 'utf8');
+    // Each new entry should appear exactly once
+    const swarmCount = content.split('.claude-flow/swarm/').length - 1;
+    const daemonStateCount = content.split('.claude-flow/daemon-state.json').length - 1;
+    const daemonPidCount = content.split('.claude-flow/daemon.pid').length - 1;
+    assert.equal(swarmCount, 1, '.claude-flow/swarm/ duplicated');
+    assert.equal(daemonStateCount, 1, '.claude-flow/daemon-state.json duplicated');
+    assert.equal(daemonPidCount, 1, '.claude-flow/daemon.pid duplicated');
+  });
+});
+
+test('setup dry-run without --skip-init shows memory check lines', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  await withTempHome(async () => {
+    const { code, output } = await captureStdout(() =>
+      runCli(['--dry-run', '--no-hooks', '--yes'], tempDir)
+    );
+    assert.equal(code, 0);
+    assert.match(output, /\[DRY RUN\] Would check: ruflo memory stats \(Total Entries\)/);
+    assert.match(output, /\[DRY RUN\] First time \(entries=0\): ruflo init --full --start-all/);
+    assert.match(output, /\[DRY RUN\] Returning \(entries>0\): ruflo init --full \+ daemon restart \+ swarm init/);
+  });
+});

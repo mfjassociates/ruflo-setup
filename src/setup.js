@@ -106,6 +106,37 @@ function ensurePnpmAvailable() {
   }
 }
 
+function isMemoryInitialized(cwd) {
+  const result = spawnSync('ruflo', ['memory', 'stats'], {
+    cwd,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    shell: process.platform === 'win32'
+  });
+  if (result.status !== 0) return false;
+  const output = (result.stdout || '').toString();
+  const match = output.match(/Total Entries\s*\|\s*(\d+)/);
+  return match ? parseInt(match[1], 10) > 0 : false;
+}
+
+function isDaemonRunning(cwd) {
+  const result = spawnSync('ruflo', ['daemon', 'status'], {
+    cwd,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    shell: process.platform === 'win32'
+  });
+  return /RUNNING/i.test((result.stdout || '').toString());
+}
+
+function startRufloRuntime(cwd) {
+  logLine('  Starting ruflo runtime (daemon + swarm)...');
+  if (isDaemonRunning(cwd)) {
+    logLine('  Daemon running — restarting...');
+    spawnSync('ruflo', ['daemon', 'stop'], { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
+  }
+  spawnSync('ruflo', ['daemon', 'start'], { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
+  spawnSync('ruflo', ['swarm', 'init', '--v3-mode'], { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
+}
+
 function runPnpmInit({ force, cwd, dryRun }) {
   const initArgs = ['init', '--full'];
   if (force) {
@@ -121,7 +152,9 @@ function runPnpmInit({ force, cwd, dryRun }) {
       logLine(`  [DRY RUN] If installed < registry latest: pnpm remove -g ruflo && pnpm add -g ruflo@latest  (cache-bust)`);
     }
     logLine(`  [DRY RUN] Would run: pnpm approve-builds -g --all  (if changes detected)`);
-    logLine(`  [DRY RUN] Would run: ruflo ${initArgs.join(' ')}`);
+    logLine(`  [DRY RUN] Would check: ruflo memory stats (Total Entries)`);
+    logLine(`  [DRY RUN] First time (entries=0): ruflo ${[...initArgs, '--start-all'].join(' ')}`);
+    logLine(`  [DRY RUN] Returning (entries>0): ruflo ${initArgs.join(' ')} + daemon restart + swarm init`);
     return;
   }
 
@@ -193,6 +226,14 @@ function runPnpmInit({ force, cwd, dryRun }) {
     }
   }
 
+  const firstTime = !isMemoryInitialized(cwd);
+  if (firstTime) {
+    logLine('  Memory not yet initialized — will use --start-all.');
+    initArgs.push('--start-all');
+  } else {
+    logLine('  Memory already initialized — will restart runtime after init.');
+  }
+
   const run = spawnSync('ruflo', initArgs, {
     cwd,
     stdio: 'inherit',
@@ -201,6 +242,10 @@ function runPnpmInit({ force, cwd, dryRun }) {
 
   if (run.status !== 0) {
     throw new Error(`ruflo init failed with exit code ${run.status}`);
+  }
+
+  if (!firstTime) {
+    startRufloRuntime(cwd);
   }
 }
 
@@ -245,6 +290,9 @@ function updateGitignore({ cwd, dryRun }) {
     '.claude-flow/security/',
     '.claude-flow/CAPABILITIES.md',
     '.claude-flow/config.yaml',
+    '.claude-flow/swarm/',
+    '.claude-flow/daemon-state.json',
+    '.claude-flow/daemon.pid',
   ];
 
   if (dryRun) {
