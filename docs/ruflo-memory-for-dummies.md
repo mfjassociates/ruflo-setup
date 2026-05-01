@@ -245,6 +245,42 @@ ruflo memory list
 
 `ruflo memory init` creates `.swarm/memory.db` in your **current project directory only**. Each project gets its own isolated database.
 
+## Hooks Are Registered but Inert by Default
+
+An important detail: **ruflo-setup registers all the hooks in `.claude/settings.json`, but they are inert until you explicitly enable them.**
+
+The design is:
+
+- The hooks exist and are registered, but they don't actively learn until enabled
+- When enabled, hooks like `post-task`, `session-end`, and `intelligence_*` automatically call `memory_store` after tool use, record patterns, and build up `.swarm/memory.db` over time
+- The `CLAUDE.md` instructions tell the AI to use memory tools, but that doesn't enable the hooks automatically
+
+In other words: **initializing the database (`ruflo memory init`) gives you the filing cabinet, but enabling hooks is what makes the system automatically file things away.**
+
+### Turning on the auto-learning loop
+
+To enable all hooks at once:
+
+```bash
+npx @claude-flow/cli@latest hooks init --enable-all
+```
+
+Or selectively enable only the ones that matter for memory:
+
+```bash
+npx @claude-flow/cli@latest hooks session-start --enable
+npx @claude-flow/cli@latest hooks post-task --enable
+npx @claude-flow/cli@latest hooks intelligence --enable
+```
+
+| Hook | What it does when enabled |
+|------|--------------------------|
+| `session-start` | Loads previous memories into the searchable database |
+| `post-task` | Records what worked/failed after each task completes |
+| `intelligence` | Learns patterns from your interactions over time |
+
+Without enabling these, memory only grows when you (or the AI) manually run `ruflo memory store`. With them enabled, the database fills up automatically as you work.
+
 ## Troubleshooting
 
 ### Which embedding fallback is active?

@@ -65,18 +65,17 @@ npm run lint
 ## Concurrency: 1 MESSAGE = ALL RELATED OPERATIONS
 
 - All operations MUST be concurrent/parallel in a single message
-- Use Claude Code's Task tool for spawning agents, not just MCP
-- ALWAYS batch ALL todos in ONE TodoWrite call (5-10+ minimum)
-- ALWAYS spawn ALL agents in ONE message with full instructions via Task tool
+- Use Claude Code's Agent tool for spawning agents, not just MCP
+- ALWAYS spawn ALL agents in ONE message with full instructions via Agent tool
 - ALWAYS batch ALL file reads/writes/edits in ONE message
 - ALWAYS batch ALL Bash commands in ONE message
 
 ## Swarm Orchestration
 
 - MUST initialize the swarm using CLI tools when starting complex tasks
-- MUST spawn concurrent agents using Claude Code's Task tool
-- Never use CLI tools alone for execution — Task tool agents do the actual work
-- MUST call CLI tools AND Task tool in ONE message for complex work
+- MUST spawn concurrent agents using Claude Code's Agent tool
+- Never use CLI tools alone for execution — Agent tool agents do the actual work
+- MUST call CLI tools AND Agent tool in ONE message for complex work
 
 ### 3-Tier Model Routing (ADR-026)
 
@@ -86,8 +85,7 @@ npm run lint
 | **2** | Haiku | ~500ms | $0.0002 | Simple tasks, low complexity (<30%) |
 | **3** | Sonnet/Opus | 2-5s | $0.003-0.015 | Complex reasoning, architecture, security (>30%) |
 
-- Always check for `[AGENT_BOOSTER_AVAILABLE]` or `[TASK_MODEL_RECOMMENDATION]` before spawning agents
-- Use Edit tool directly when `[AGENT_BOOSTER_AVAILABLE]`
+- For Tier 1 simple transforms, use Edit tool directly — no LLM agent needed
 
 ## Swarm Configuration & Anti-Drift
 
@@ -104,10 +102,10 @@ npx @claude-flow/cli@latest swarm init --topology hierarchical --max-agents 8 --
 
 ## Swarm Execution Rules
 
-- ALWAYS use `run_in_background: true` for all agent Task calls
-- ALWAYS put ALL agent Task calls in ONE message for parallel execution
+- ALWAYS use `run_in_background: true` for all Agent tool calls
+- ALWAYS put ALL Agent calls in ONE message for parallel execution
 - After spawning, STOP — do NOT add more tool calls or check status
-- Never poll TaskOutput or check swarm status — trust agents to return
+- Never poll agent status repeatedly — trust agents to return
 - When agent results arrive, review ALL results before proceeding
 
 ## V3 CLI Commands
@@ -135,7 +133,7 @@ npx @claude-flow/cli@latest memory search --query "authentication patterns"
 npx @claude-flow/cli@latest doctor --fix
 ```
 
-## Available Agents (60+ Types)
+## Available Agents (16 Roles + Custom)
 
 ### Core Development
 `coder`, `reviewer`, `tester`, `planner`, `researcher`
@@ -143,29 +141,86 @@ npx @claude-flow/cli@latest doctor --fix
 ### Specialized
 `security-architect`, `security-auditor`, `memory-specialist`, `performance-engineer`
 
-### Swarm Coordination
+### Coordination
 `hierarchical-coordinator`, `mesh-coordinator`, `adaptive-coordinator`
 
 ### GitHub & Repository
 `pr-manager`, `code-review-swarm`, `issue-tracker`, `release-manager`
 
-### SPARC Methodology
-`sparc-coord`, `sparc-coder`, `specification`, `pseudocode`, `architecture`
+Any string can be used as a custom agent type — these are the typed roles with specialized behavior.
 
-## Memory Commands Reference
+## Memory & Vector Search
+
+### MCP Tools (use via ToolSearch to discover)
+
+| Tool | Description |
+|------|-------------|
+| `memory_store` | Store value with ONNX 384-dim vector embedding |
+| `memory_search` | Semantic vector search by query |
+| `memory_retrieve` | Get entry by key |
+| `memory_list` | List entries in namespace |
+| `memory_delete` | Delete entry |
+| `memory_import_claude` | Import Claude Code memories into AgentDB (allProjects=true for all) |
+| `memory_search_unified` | Search across ALL namespaces (Claude + AgentDB + patterns) |
+| `memory_bridge_status` | Show bridge health, vectors, SONA, intelligence |
+
+### CLI Commands
 
 ```bash
-# Store (REQUIRED: --key, --value; OPTIONAL: --namespace, --ttl, --tags)
+# Store with vector embedding
 npx @claude-flow/cli@latest memory store --key "pattern-auth" --value "JWT with refresh" --namespace patterns
 
-# Search (REQUIRED: --query; OPTIONAL: --namespace, --limit, --threshold)
+# Semantic search
 npx @claude-flow/cli@latest memory search --query "authentication patterns"
 
-# List (OPTIONAL: --namespace, --limit)
-npx @claude-flow/cli@latest memory list --namespace patterns --limit 10
+# Import all Claude Code memories into AgentDB
+node .claude/helpers/auto-memory-hook.mjs import-all
+```
 
-# Retrieve (REQUIRED: --key; OPTIONAL: --namespace)
-npx @claude-flow/cli@latest memory retrieve --key "pattern-auth" --namespace patterns
+### Claude Code ↔ AgentDB Bridge
+
+Claude Code auto-memory files (`~/.claude/projects/*/memory/*.md`) are automatically imported into AgentDB with ONNX vector embeddings on session start. Use `memory_search_unified` to search across both stores.
+
+## Key MCP Tools (314 available — use ToolSearch to discover)
+
+### Most Used Tools
+
+| Category | Tools | What They Do |
+|----------|-------|-------------|
+| **Memory** | `memory_store`, `memory_search`, `memory_search_unified` | Store/search with ONNX vector embeddings |
+| **Claude Bridge** | `memory_import_claude`, `memory_bridge_status` | Import Claude memories into AgentDB |
+| **Swarm** | `swarm_init`, `swarm_status`, `swarm_health` | Multi-agent coordination |
+| **Agents** | `agent_spawn`, `agent_list`, `agent_status` | Agent lifecycle |
+| **Hive-Mind** | `hive-mind_init`, `hive-mind_spawn`, `hive-mind_consensus` | Byzantine/Raft consensus |
+| **Hooks** | `hooks_route`, `hooks_session-start`, `hooks_post-task` | Task routing + learning |
+| **Workers** | `hooks_worker-list`, `hooks_worker-dispatch` | 12 background workers |
+| **Security** | `aidefence_scan`, `aidefence_is_safe` | Prompt injection detection |
+| **Intelligence** | `hooks_intelligence`, `neural_status` | Pattern learning + SONA |
+
+### Swarm Capabilities
+
+- **Topologies**: hierarchical (anti-drift), mesh, ring, star, adaptive
+- **Consensus**: Raft (leader-based), Byzantine (PBFT), Gossip (eventual)
+- **Hive-Mind**: Queen-led coordination with spawn, broadcast, consensus voting, shared memory
+- **12 Background Workers**: audit, optimize, testgaps, map, deepdive, document, refactor, benchmark, ultralearn, consolidate, predict, preload
+
+### Memory Capabilities
+
+- **ONNX Embeddings**: all-MiniLM-L6-v2, 384 dimensions — real neural vectors
+- **DiskANN**: SSD-friendly vector search (8,000x faster insert than HNSW, perfect recall at 1K)
+- **sql.js**: Cross-platform SQLite (WASM, no native compilation)
+- **Claude Code Bridge**: Auto-imports MEMORY.md files into AgentDB on session start
+- **Unified Search**: `memory_search_unified` searches Claude memories + AgentDB + patterns
+- **SONA Learning**: Trajectory recording → pattern extraction → file persistence
+
+### How to Discover Tools
+
+Use ToolSearch to find specific tools:
+```
+ToolSearch("memory search")     → memory_store, memory_search, memory_search_unified
+ToolSearch("swarm")             → swarm_init, swarm_status, swarm_health, swarm_shutdown
+ToolSearch("hive consensus")    → hive-mind_consensus, hive-mind_status
+ToolSearch("+aidefence")        → aidefence_scan, aidefence_is_safe, aidefence_has_pii
 ```
 
 ## Quick Setup
@@ -176,13 +231,14 @@ npx @claude-flow/cli@latest daemon start
 npx @claude-flow/cli@latest doctor --fix
 ```
 
-## Claude Code vs CLI Tools
+## Claude Code vs MCP Tools
 
-- Claude Code's Task tool handles ALL execution: agents, file ops, code generation, git
-- CLI tools handle coordination via Bash: swarm init, memory, hooks, routing
-- NEVER use CLI tools as a substitute for Task tool agents
+- **Claude Code Agent tool** handles execution: agents, file ops, code generation, git
+- **MCP tools** (via ToolSearch) handle coordination: swarm, memory, hooks, routing, hive-mind
+- **CLI commands** (via Bash) are the same tools with terminal output
+- Use `ToolSearch("keyword")` to discover available MCP tools
 
 ## Support
 
-- Documentation: https://github.com/ruvnet/claude-flow
-- Issues: https://github.com/ruvnet/claude-flow/issues
+- Documentation: https://github.com/ruvnet/ruflo
+- Issues: https://github.com/ruvnet/ruflo/issues
