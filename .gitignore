@@ -11,3 +11,6 @@ ruvector.db
 .claude-flow/security/
 .claude-flow/CAPABILITIES.md
 .claude-flow/config.yaml
+.claude-flow/swarm/
+.claude-flow/daemon-state.json
+.claude-flow/daemon.pid
