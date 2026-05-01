@@ -7,3 +7,7 @@ pnpm-lock.yaml
 ruflo-setup/README.md
 .swarm/
 ruvector.db
+.claude-flow/metrics/
+.claude-flow/security/
+.claude-flow/CAPABILITIES.md
+.claude-flow/config.yaml
