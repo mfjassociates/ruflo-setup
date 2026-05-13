@@ -3,7 +3,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { readJsonSafe } from './utils.js';
+import { readJsonSafe, MIN_NODE_VERSION, MIN_PNPM_VERSION, parseSemver, semverGte } from './utils.js';
 import { getGlobalHookStatus } from './hooks.js';
 
 const require = createRequire(import.meta.url);
@@ -72,13 +72,21 @@ function getGlobalPkgMap() {
 function checkLayer0() {
   const lines = [];
   let ok = 0;
-  const nodeMajor = parseInt(process.version.slice(1), 10);
-  if (nodeMajor >= 20) { lines.push(`  ${OK} Node.js ${process.version}  (>=20 required)`); ok += 1; }
-  else { lines.push(`  ${ERR} Node.js ${process.version}  (>=20 required — upgrade Node.js)`); }
+  const nodeVersion = process.versions.node;
+  if (semverGte(parseSemver(nodeVersion), parseSemver(MIN_NODE_VERSION))) {
+    lines.push(`  ${OK} Node.js v${nodeVersion}  (>=${MIN_NODE_VERSION} required)`); ok += 1;
+  } else {
+    lines.push(`  ${ERR} Node.js v${nodeVersion}  (>=${MIN_NODE_VERSION} required — upgrade Node.js)`);
+  }
 
   const pnpmRes = spawn('pnpm', ['--version']);
   if (pnpmRes.status === 0 && pnpmRes.stdout.trim()) {
-    lines.push(`  ${OK} pnpm ${pnpmRes.stdout.trim()}`); ok += 1;
+    const pnpmVersion = pnpmRes.stdout.trim();
+    if (semverGte(parseSemver(pnpmVersion), parseSemver(MIN_PNPM_VERSION))) {
+      lines.push(`  ${OK} pnpm ${pnpmVersion}  (>=${MIN_PNPM_VERSION} required)`); ok += 1;
+    } else {
+      lines.push(`  ${ERR} pnpm ${pnpmVersion}  (>=${MIN_PNPM_VERSION} required — upgrade pnpm)`);
+    }
   } else {
     lines.push(`  ${MISS} pnpm  (install: npm install -g pnpm)`);
   }
@@ -287,7 +295,9 @@ export async function runStatus({ cwd, packageRoot }) {
     process.stdout.write(`\nSummary: ${totalOk}/${totalChecks} features enabled\n`);
     process.stdout.write(`For agents, skills, and slash commands reference: docs/ruflo-benefit.md\n`);
 
-    const hasRequiredMissing = parseInt(process.version.slice(1), 10) < 20 || !process.env.ANTHROPIC_API_KEY;
+    const hasRequiredMissing =
+      !semverGte(parseSemver(process.versions.node), parseSemver(MIN_NODE_VERSION))
+      || !process.env.ANTHROPIC_API_KEY;
     if (hasRequiredMissing) process.stdout.write(`Run 'ruflo-setup' to configure missing required features.\n`);
     process.stdout.write('\n');
   } catch (error) {

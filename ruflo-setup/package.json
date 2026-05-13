@@ -10,7 +10,7 @@
     "@mfjjs/ruflo-setup": "latest"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.22.2"
   },
   "keywords": [
     "ruflo",

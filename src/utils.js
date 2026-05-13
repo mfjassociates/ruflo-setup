@@ -2,6 +2,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
 
+export const MIN_NODE_VERSION = '22.22.2';
+export const MIN_PNPM_VERSION = '11.1.1';
+
 export function pathExists(filePath) {
   return fs.existsSync(filePath);
 }
@@ -68,6 +71,27 @@ export function parseArgs(argv) {
   }
 
   return flags;
+}
+
+export function parseSemver(rawVersion) {
+  const match = String(rawVersion || '').trim().match(/(\d+)\.(\d+)\.(\d+)/);
+  if (!match) return null;
+  return {
+    major: Number(match[1]),
+    minor: Number(match[2]),
+    patch: Number(match[3])
+  };
+}
+
+export function semverGte(a, b) {
+  if (!a || !b) return false;
+  if (a.major !== b.major) return a.major > b.major;
+  if (a.minor !== b.minor) return a.minor > b.minor;
+  return a.patch >= b.patch;
+}
+
+export function semverLt(a, b) {
+  return !semverGte(a, b);
 }
 
 export function toPlatformMcpConfig(platform) {

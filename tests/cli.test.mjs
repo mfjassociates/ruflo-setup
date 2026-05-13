@@ -13,6 +13,20 @@ async function captureStdout(fn) {
   finally { process.stdout.write = orig; }
 }
 
+async function captureOutput(fn) {
+  let stdout = '';
+  let stderr = '';
+  const origOut = process.stdout.write.bind(process.stdout);
+  const origErr = process.stderr.write.bind(process.stderr);
+  process.stdout.write = (chunk, _enc, cb) => { stdout += String(chunk); if (typeof cb === 'function') cb(); return true; };
+  process.stderr.write = (chunk, _enc, cb) => { stderr += String(chunk); if (typeof cb === 'function') cb(); return true; };
+  try { const code = await fn(); return { code, stdout, stderr }; }
+  finally {
+    process.stdout.write = origOut;
+    process.stderr.write = origErr;
+  }
+}
+
 async function withTempHome(fn) {
   const prevHome = process.env.HOME;
   const prevUserProfile = process.env.USERPROFILE;
@@ -51,6 +65,53 @@ test('setup dry-run works without init', async () => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
   const code = await runCli(['--dry-run', '--skip-init', '--no-hooks', '--yes'], tempDir);
   assert.equal(code, 0);
+});
+
+test('setup fails prerequisite check when pnpm is below minimum', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  const fakeBinDir = path.join(tempDir, 'fake-bin');
+  fs.mkdirSync(fakeBinDir, { recursive: true });
+
+  const fakePnpmCmd = path.join(fakeBinDir, 'pnpm.cmd');
+  fs.writeFileSync(
+    fakePnpmCmd,
+    '@echo off\r\nif "%1"=="--version" (\r\n  echo 11.0.0\r\n  exit /b 0\r\n)\r\nexit /b 0\r\n',
+    'utf8'
+  );
+
+  const previousPath = process.env.PATH;
+  process.env.PATH = `${fakeBinDir}${path.delimiter}${previousPath || ''}`;
+
+  try {
+    const { code, stderr } = await captureOutput(() =>
+      runCli(['--no-hooks', '--yes'], tempDir)
+    );
+    assert.equal(code, 1);
+    assert.match(stderr, /pnpm 11\.1\.1 or higher is required, but found 11\.0\.0\./);
+  } finally {
+    if (typeof previousPath === 'undefined') delete process.env.PATH;
+    else process.env.PATH = previousPath;
+  }
+});
+
+test('setup fails prerequisite check when node is below minimum', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  const originalNodeDescriptor = Object.getOwnPropertyDescriptor(process.versions, 'node');
+
+  Object.defineProperty(process.versions, 'node', {
+    ...originalNodeDescriptor,
+    value: '22.22.1'
+  });
+
+  try {
+    const { code, stderr } = await captureOutput(() =>
+      runCli(['--no-hooks', '--yes'], tempDir)
+    );
+    assert.equal(code, 1);
+    assert.match(stderr, /Node\.js 22\.22\.2 or newer is required, but found 22\.22\.1\./);
+  } finally {
+    Object.defineProperty(process.versions, 'node', originalNodeDescriptor);
+  }
 });
 
 test('hooks status shows pointing-to line for pnpm global store', async () => {

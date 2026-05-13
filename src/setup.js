@@ -2,7 +2,18 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
-import { pathExists, copyFileSync, confirm, toPlatformMcpConfig, writeJson } from './utils.js';
+import {
+  pathExists,
+  copyFileSync,
+  confirm,
+  toPlatformMcpConfig,
+  writeJson,
+  MIN_NODE_VERSION,
+  MIN_PNPM_VERSION,
+  parseSemver,
+  semverGte,
+  semverLt
+} from './utils.js';
 import { installGlobalCheckRufloHook } from './hooks.js';
 
 function logLine(message) {
@@ -33,21 +44,14 @@ function getPnpmInstallSuggestions(platform) {
   ];
 }
 
-const MIN_PNPM_VERSION = '10.32.1';
-
-function parseSemver(str) {
-  const [major = 0, minor = 0, patch = 0] = str.trim().split('.').map(Number);
-  return { major, minor, patch };
-}
-
-function semverGte(a, b) {
-  if (a.major !== b.major) return a.major > b.major;
-  if (a.minor !== b.minor) return a.minor > b.minor;
-  return a.patch >= b.patch;
-}
-
-function semverLt(a, b) {
-  return !semverGte(a, b);
+function ensureNodeVersion() {
+  const nodeVersion = process.versions.node;
+  if (!semverGte(parseSemver(nodeVersion), parseSemver(MIN_NODE_VERSION))) {
+    throw new Error(
+      `Node.js ${MIN_NODE_VERSION} or newer is required, but found ${nodeVersion}.\n` +
+      `Install/select Node.js ${MIN_NODE_VERSION}+ and re-run ruflo-setup.`
+    );
+  }
 }
 
 function getInstalledVersion(pkg) {
@@ -89,11 +93,16 @@ function ensurePnpmAvailable() {
     const suggestions = getPnpmInstallSuggestions(process.platform)
       .map((command) => `  - ${command}`)
       .join('\n');
+    const nvm4wShimNote = process.platform === 'win32'
+      ? `\nIf using NVM4W + Node 22.22.x, ensure this path is on PATH:\n` +
+        `  C:\\nvm4w\\nodejs\\node_modules\\corepack\\shims\n` +
+        `Old shim paths are no longer used by newer Node 22.22.x builds.`
+      : '';
 
     throw new Error(
       `pnpm is required but was not found in PATH.\n` +
       `Install pnpm, then re-run ruflo-setup.\n` +
-      `Quick install options for ${platformLabel}:\n${suggestions}`
+      `Quick install options for ${platformLabel}:\n${suggestions}${nvm4wShimNote}`
     );
   }
 
@@ -104,6 +113,11 @@ function ensurePnpmAvailable() {
       `Upgrade with: pnpm self-update`
     );
   }
+}
+
+function ensureRequiredRuntime() {
+  ensureNodeVersion();
+  ensurePnpmAvailable();
 }
 
 function isMemoryInitialized(cwd) {
@@ -366,6 +380,8 @@ export async function runSetup({
   }
   logLine('');
 
+  ensureRequiredRuntime();
+
   // Check if a newer version of ruflo-setup itself is available.
   if (!dryRun && !yes) {
     const currentVersion = getCurrentVersion(packageRoot);
@@ -524,7 +540,7 @@ export function runUpdate({ dryRun = false } = {}) {
     return;
   }
 
-  ensurePnpmAvailable();
+  ensureRequiredRuntime();
 
   logLine('Updating @mfjjs/ruflo-setup to latest...');
   const result = spawnSync('pnpm', ['add', '-g', '@mfjjs/ruflo-setup@latest'], {

@@ -29,8 +29,17 @@ You only need to do this once per project. Just run the command and you're ready
 <details>
   <summary>Click to toggle visibility</summary>
 
-- Node.js 20+
-- pnpm **10.32.1 or higher** available on PATH
+- Node.js **22.22.2 or newer**
+- pnpm **11.1.1 or newer** available on PATH
+
+Why Node 22+ is required for pnpm 11:
+
+- `node:sqlite` (Node 22+)
+- Modern ESM loader hooks (Node 22+)
+- Updated module resolution (Node 22+)
+
+Node 22 is required because pnpm 11 depends on these Node 22 APIs. Also required because onnxruntime dependencies
+for ruflo does not work well with previous stacks.
 
 Quickest pnpm install by platform:
 
@@ -51,6 +60,14 @@ Alternative (all platforms with recent Node.js):
 corepack enable
 corepack prepare pnpm@latest --activate
 ```
+
+Windows + NVM4W + Corepack shim path note:
+
+- Corepack shims moved in Node 22.22.x with NVM4W.
+- Old locations: `%LOCALAPPDATA%\Programs\corepack\shims` or `~/.local/bin`
+- New location: `C:\nvm4w\nodejs\node_modules\corepack\shims`
+- NVM4W does not add this directory to `PATH`, so add it manually or `pnpm` may not be found.  On windows, search
+for the command "Edit environment variables for your account" and edit the PATH env var.
 </details>
 
 ## 📦 Installation
