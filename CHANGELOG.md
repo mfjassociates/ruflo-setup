@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.19](///compare/v0.2.18...v0.2.19) (2026-05-13)
+
+
+### Features
+
+* add sample RuFlo prompts for quick-start and conceptual exploration 247402b
+* update Node.js and pnpm version requirements 49e37a2
+
+
+### Bug Fixes
+
+* add .claude-flow/swarm/ and daemon state files to .gitignore 1165925
+
 ### [0.2.18](///compare/v0.2.17...v0.2.18) (2026-05-01)
 
 
