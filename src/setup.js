@@ -11,8 +11,7 @@ import {
   MIN_NODE_VERSION,
   MIN_PNPM_VERSION,
   parseSemver,
-  semverGte,
-  semverLt
+  semverGte
 } from './utils.js';
 import { installGlobalCheckRufloHook } from './hooks.js';
 
@@ -54,8 +53,8 @@ function ensureNodeVersion() {
   }
 }
 
-function getInstalledVersion(pkg) {
-  const result = spawnSync('pnpm', ['list', '-g', pkg, '--json'], {
+function getInstalledVersion(pkg, commandRunner = spawnSync) {
+  const result = commandRunner('pnpm', ['list', '-g', pkg, '--json'], {
     stdio: ['ignore', 'pipe', 'pipe'],
     shell: process.platform === 'win32'
   });
@@ -69,8 +68,8 @@ function getInstalledVersion(pkg) {
   }
 }
 
-function getRegistryVersion(pkg) {
-  const result = spawnSync('pnpm', ['view', pkg, 'version'], {
+function getRegistryVersion(pkg, commandRunner = spawnSync) {
+  const result = commandRunner('pnpm', ['view', pkg, 'version'], {
     stdio: ['ignore', 'pipe', 'pipe'],
     shell: process.platform === 'win32'
   });
@@ -78,8 +77,8 @@ function getRegistryVersion(pkg) {
   return (result.stdout || '').toString().trim() || null;
 }
 
-function ensurePnpmAvailable() {
-  const check = spawnSync('pnpm', ['--version'], {
+function ensurePnpmAvailable(commandRunner = spawnSync) {
+  const check = commandRunner('pnpm', ['--version'], {
     stdio: ['ignore', 'pipe', 'ignore'],
     shell: process.platform === 'win32'
   });
@@ -115,13 +114,13 @@ function ensurePnpmAvailable() {
   }
 }
 
-function ensureRequiredRuntime() {
+function ensureRequiredRuntime(commandRunner = spawnSync) {
   ensureNodeVersion();
-  ensurePnpmAvailable();
+  ensurePnpmAvailable(commandRunner);
 }
 
-function isMemoryInitialized(cwd) {
-  const result = spawnSync('ruflo', ['memory', 'stats'], {
+function isMemoryInitialized(cwd, commandRunner = spawnSync) {
+  const result = commandRunner('ruflo', ['memory', 'stats'], {
     cwd,
     stdio: ['ignore', 'pipe', 'pipe'],
     shell: process.platform === 'win32'
@@ -132,8 +131,8 @@ function isMemoryInitialized(cwd) {
   return match ? parseInt(match[1], 10) > 0 : false;
 }
 
-function isDaemonRunning(cwd) {
-  const result = spawnSync('ruflo', ['daemon', 'status'], {
+function isDaemonRunning(cwd, commandRunner = spawnSync) {
+  const result = commandRunner('ruflo', ['daemon', 'status'], {
     cwd,
     stdio: ['ignore', 'pipe', 'pipe'],
     shell: process.platform === 'win32'
@@ -141,17 +140,19 @@ function isDaemonRunning(cwd) {
   return /RUNNING/i.test((result.stdout || '').toString());
 }
 
-function startRufloRuntime(cwd) {
+function startRufloRuntime(cwd, commandRunner = spawnSync) {
   logLine('  Starting ruflo runtime (daemon + swarm)...');
-  if (isDaemonRunning(cwd)) {
+  if (isDaemonRunning(cwd, commandRunner)) {
     logLine('  Daemon running — restarting...');
-    spawnSync('ruflo', ['daemon', 'stop'], { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
+    commandRunner('ruflo', ['daemon', 'stop'], { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
   }
-  spawnSync('ruflo', ['daemon', 'start'], { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
-  spawnSync('ruflo', ['swarm', 'init', '--v3-mode'], { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
+  commandRunner('ruflo', ['daemon', 'start'], { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
+  commandRunner('ruflo', ['swarm', 'init', '--v3-mode'], { cwd, stdio: 'inherit', shell: process.platform === 'win32' });
 }
 
-function runPnpmInit({ force, cwd, dryRun }) {
+// commandRunner defaults to spawnSync in production (real system commands).
+// Tests can inject a fake runner to simulate pnpm/ruflo outputs without touching global installs.
+export function runPnpmInit({ force, cwd, dryRun, commandRunner = spawnSync }) {
   const initArgs = ['init', '--full'];
   if (force) {
     initArgs.push('--force');
@@ -161,9 +162,10 @@ function runPnpmInit({ force, cwd, dryRun }) {
     if (process.env.RUFLO_DEV) {
       logLine(`  [DRY RUN] RUFLO_DEV is set — would skip pnpm add -g ruflo@latest (using local copy)`);
     } else {
-      logLine(`  [DRY RUN] Would run: pnpm add -g ruflo@latest`);
-      logLine(`  [DRY RUN] Would check: installed version vs registry latest`);
-      logLine(`  [DRY RUN] If installed < registry latest: pnpm remove -g ruflo && pnpm add -g ruflo@latest  (cache-bust)`);
+      logLine(`  [DRY RUN] Would run: pnpm view ruflo version`);
+      logLine(`  [DRY RUN] Would compare: installed ruflo version vs registry latest`);
+      logLine(`  [DRY RUN] If installed version is missing or older: pnpm add -g ruflo@<resolved-latest-version>`);
+      logLine(`  [DRY RUN] If installed version equals registry latest: no changes`);
     }
     logLine(`  [DRY RUN] Would run: pnpm approve-builds -g --all  (if changes detected)`);
     logLine(`  [DRY RUN] Would check: ruflo memory stats (Total Entries)`);
@@ -172,65 +174,46 @@ function runPnpmInit({ force, cwd, dryRun }) {
     return;
   }
 
-  ensurePnpmAvailable();
+  ensurePnpmAvailable(commandRunner);
 
   let somethingChanged = false;
 
   if (process.env.RUFLO_DEV) {
     logLine('  RUFLO_DEV is set — skipping pnpm add -g ruflo@latest (using local copy).');
   } else {
-  // Capture stdout to detect whether pnpm installed/updated anything.
-  // Progress spinners go to stderr (still shown to user); stdout has the summary.
-  const install = spawnSync('pnpm', ['add', '-g', 'ruflo@latest'], {
-    cwd,
-    stdio: ['inherit', 'pipe', 'inherit'],
-    shell: process.platform === 'win32'
-  });
-
-  let installOutput = (install.stdout || '').toString();
-  if (installOutput) {
-    process.stdout.write(installOutput);
-  }
-
-  if (install.status !== 0) {
-    throw new Error(`pnpm add -g ruflo@latest failed with exit code ${install.status}`);
-  }
-
-  // pnpm prints a "Packages:" summary line and "+ pkg version" lines when
-  // something is actually installed or updated. When already up to date the
-  // stdout is empty or contains only "Already up to date".
-  somethingChanged = /Packages:/i.test(installOutput) || /^\+\s/m.test(installOutput);
-
-  // Check whether the installed version is behind the registry latest.
-  // If so, pnpm served a stale cached copy — remove and re-add to force a fresh install.
-  const installedVer = getInstalledVersion('ruflo');
-  const registryVer  = getRegistryVersion('ruflo');
-  if (installedVer && registryVer && semverLt(parseSemver(installedVer), parseSemver(registryVer))) {
-    logLine(`  Installed ruflo ${installedVer} is behind registry ${registryVer} — cache-busting with remove + add...`);
-    spawnSync('pnpm', ['remove', '-g', 'ruflo'], {
-      cwd,
-      stdio: 'inherit',
-      shell: process.platform === 'win32'
-    });
-    const reinstall = spawnSync('pnpm', ['add', '-g', 'ruflo@latest'], {
-      cwd,
-      stdio: ['inherit', 'pipe', 'inherit'],
-      shell: process.platform === 'win32'
-    });
-    installOutput = (reinstall.stdout || '').toString();
-    if (installOutput) {
-      process.stdout.write(installOutput);
+    const registryVer = getRegistryVersion('ruflo', commandRunner);
+    if (!registryVer) {
+      throw new Error('Unable to resolve latest version for ruflo from pnpm registry.');
     }
-    if (reinstall.status !== 0) {
-      throw new Error(`pnpm add -g ruflo@latest (after cache-bust) failed with exit code ${reinstall.status}`);
+
+    const installedVer = getInstalledVersion('ruflo', commandRunner);
+    if (installedVer && semverGte(parseSemver(installedVer), parseSemver(registryVer))) {
+      logLine(`  ruflo is already up to date (${installedVer}). No global package changes needed.`);
+    } else {
+      // Capture stdout to detect whether pnpm installed/updated anything.
+      // Progress spinners go to stderr (still shown to user); stdout has the summary.
+      const install = commandRunner('pnpm', ['add', '-g', `ruflo@${registryVer}`], {
+        cwd,
+        stdio: ['inherit', 'pipe', 'inherit'],
+        shell: process.platform === 'win32'
+      });
+
+      const installOutput = (install.stdout || '').toString();
+      if (installOutput) {
+        process.stdout.write(installOutput);
+      }
+
+      if (install.status !== 0) {
+        throw new Error(`pnpm add -g ruflo@${registryVer} failed with exit code ${install.status}`);
+      }
+
+      somethingChanged = true;
     }
-    somethingChanged = true;
-  }
   } // end RUFLO_DEV else
 
   if (somethingChanged) {
     logLine('  Changes detected — running pnpm approve-builds -g --all ...');
-    const approve = spawnSync('pnpm', ['approve-builds', '-g', '--all'], {
+    const approve = commandRunner('pnpm', ['approve-builds', '-g', '--all'], {
       cwd,
       stdio: 'inherit',
       shell: process.platform === 'win32'
@@ -240,7 +223,7 @@ function runPnpmInit({ force, cwd, dryRun }) {
     }
   }
 
-  const firstTime = !isMemoryInitialized(cwd);
+  const firstTime = !isMemoryInitialized(cwd, commandRunner);
   if (firstTime) {
     logLine('  Memory not yet initialized — will use --start-all.');
     initArgs.push('--start-all');
@@ -248,7 +231,7 @@ function runPnpmInit({ force, cwd, dryRun }) {
     logLine('  Memory already initialized — will restart runtime after init.');
   }
 
-  const run = spawnSync('ruflo', initArgs, {
+  const run = commandRunner('ruflo', initArgs, {
     cwd,
     stdio: 'inherit',
     shell: process.platform === 'win32'
@@ -259,7 +242,7 @@ function runPnpmInit({ force, cwd, dryRun }) {
   }
 
   if (!firstTime) {
-    startRufloRuntime(cwd);
+    startRufloRuntime(cwd, commandRunner);
   }
 }
 
@@ -527,23 +510,40 @@ export function runCleanup({ dryRun = false } = {}) {
   logLine('Cleanup complete.');
 }
 
-export function runUpdate({ dryRun = false } = {}) {
+// commandRunner defaults to spawnSync in production (real system commands).
+// Tests can inject a fake runner to verify version-check decisions deterministically.
+export function runUpdate({ dryRun = false, commandRunner = spawnSync } = {}) {
   logLine('');
   logLine('Ruflo Setup Update');
   logLine('');
 
+  const pkgName = '@mfjjs/ruflo-setup';
+
   if (dryRun) {
-    logLine('[DRY RUN] Would run: pnpm add -g @mfjjs/ruflo-setup@latest');
-    logLine('[DRY RUN] Would check: installed version vs registry latest');
-    logLine('[DRY RUN] If installed < registry latest: pnpm remove -g @mfjjs/ruflo-setup && pnpm add -g @mfjjs/ruflo-setup@latest  (cache-bust)');
+    logLine(`[DRY RUN] Would run: pnpm view ${pkgName} version`);
+    logLine(`[DRY RUN] Would compare: installed ${pkgName} version vs registry latest`);
+    logLine(`[DRY RUN] If installed version is missing or older: pnpm add -g ${pkgName}@<resolved-latest-version>`);
+    logLine('[DRY RUN] If installed version equals registry latest: no changes');
     logLine('');
     return;
   }
 
-  ensureRequiredRuntime();
+  ensureRequiredRuntime(commandRunner);
 
-  logLine('Updating @mfjjs/ruflo-setup to latest...');
-  const result = spawnSync('pnpm', ['add', '-g', '@mfjjs/ruflo-setup@latest'], {
+  const registryVer = getRegistryVersion(pkgName, commandRunner);
+  if (!registryVer) {
+    throw new Error(`Unable to resolve latest version for ${pkgName} from pnpm registry.`);
+  }
+
+  const installedVer = getInstalledVersion(pkgName, commandRunner);
+  if (installedVer && semverGte(parseSemver(installedVer), parseSemver(registryVer))) {
+    logLine(`${pkgName} is already up to date (${installedVer}). No changes made.`);
+    logLine('');
+    return;
+  }
+
+  logLine(`Updating ${pkgName} to ${registryVer}...`);
+  const result = commandRunner('pnpm', ['add', '-g', `${pkgName}@${registryVer}`], {
     stdio: ['inherit', 'pipe', 'inherit'],
     shell: process.platform === 'win32'
   });
@@ -554,26 +554,7 @@ export function runUpdate({ dryRun = false } = {}) {
   }
 
   if (result.status !== 0) {
-    throw new Error(`pnpm add -g @mfjjs/ruflo-setup@latest failed with exit code ${result.status}`);
-  }
-
-  // Check whether the installed version is behind the registry latest.
-  // If so, pnpm served a stale cached copy — remove and re-add to force a fresh install.
-  const installedVer = getInstalledVersion('@mfjjs/ruflo-setup');
-  const registryVer  = getRegistryVersion('@mfjjs/ruflo-setup');
-  if (installedVer && registryVer && semverLt(parseSemver(installedVer), parseSemver(registryVer))) {
-    logLine(`  Installed @mfjjs/ruflo-setup ${installedVer} is behind registry ${registryVer} — cache-busting with remove + add...`);
-    spawnSync('pnpm', ['remove', '-g', '@mfjjs/ruflo-setup'], {
-      stdio: 'inherit',
-      shell: process.platform === 'win32'
-    });
-    const reinstall = spawnSync('pnpm', ['add', '-g', '@mfjjs/ruflo-setup@latest'], {
-      stdio: 'inherit',
-      shell: process.platform === 'win32'
-    });
-    if (reinstall.status !== 0) {
-      throw new Error(`pnpm add -g @mfjjs/ruflo-setup@latest (after cache-bust) failed with exit code ${reinstall.status}`);
-    }
+    throw new Error(`pnpm add -g ${pkgName}@${registryVer} failed with exit code ${result.status}`);
   }
 
   logLine('');

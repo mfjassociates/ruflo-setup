@@ -143,6 +143,8 @@ Update `@mfjjs/ruflo-setup` itself to the latest published version:
 ruflo-setup update
 ```
 
+`ruflo-setup update` resolves the latest version first with `pnpm view @mfjjs/ruflo-setup version`, compares it to the installed global version, and only runs `pnpm add -g @mfjjs/ruflo-setup@<resolved-version>` when an update is needed. If the installed version already matches, it does nothing.
+
 It is best to always have the latest version before running setup. When you run `ruflo-setup` without arguments it automatically checks for a newer version and will prompt you to update if one is found, so in most cases you will not need to run this manually.
 
 ```bash
@@ -202,7 +204,7 @@ Flow:
 4. `src/cli.js` parses command and flags.
 5. `src/setup.js` runs setup steps:
 	 - checks for a newer version of itself and prompts to update
-	 - optional `pnpm add -g ruflo@latest` then `ruflo init --full`
+	 - optional resolve/install of latest `ruflo` version, then `ruflo init --full`
 	 - writes platform-aware `.mcp.json` (MCP servers invoked via `npx` for cross-platform compatibility)
 	 - adds `.mcp.json` and `.claude/settings.json` to the project's `.gitignore`
 	 - copies `templates/CLAUDE.md`
@@ -210,7 +212,7 @@ Flow:
 
 When called as `ruflo-setup status`, step 5 dispatches to `src/status.js` which checks all layers (0–8) and prints a feature status report.
 
-When called as `ruflo-setup update`, it runs `pnpm add -g @mfjjs/ruflo-setup@latest` to update the tool itself.
+When called as `ruflo-setup update`, it resolves the latest published version, compares it to the installed global version, and installs the exact resolved version only when an update is required.
 
 When called as `ruflo-setup cleanup`, it removes Ruflo packages from the npm global registry to eliminate conflicts with pnpm-managed versions.
 
@@ -224,7 +226,7 @@ When developing on ruflo itself, set `RUFLO_DEV=1` to prevent `ruflo-setup` from
 RUFLO_DEV=1 ruflo-setup
 ```
 
-With `RUFLO_DEV` set, the `pnpm add -g ruflo@latest` step (including the version check and cache-bust) is skipped entirely. `ruflo init --full` still runs against whatever ruflo is currently on disk. Unset the variable to resume normal update behaviour.
+With `RUFLO_DEV` set, the ruflo global update check/install step is skipped entirely. `ruflo init --full` still runs against whatever ruflo is currently on disk. Unset the variable to resume normal update behaviour.
 
 From this repository root (`setup-ruflo/`):
 

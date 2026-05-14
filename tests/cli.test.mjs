@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { runCli } from '../src/cli.js';
+import { runUpdate, runPnpmInit } from '../src/setup.js';
 
 async function captureStdout(fn) {
   let output = '';
@@ -325,4 +326,150 @@ test('setup dry-run without --skip-init shows memory check lines', async () => {
     assert.match(output, /\[DRY RUN\] First time \(entries=0\): ruflo init --full --start-all/);
     assert.match(output, /\[DRY RUN\] Returning \(entries>0\): ruflo init --full \+ daemon restart \+ swarm init/);
   });
+});
+
+test('runUpdate does nothing when @mfjjs/ruflo-setup is already current', async () => {
+  const calls = [];
+  const commandRunner = (command, args = [], options = {}) => {
+    calls.push({ command, args, options });
+    if (command === 'pnpm' && args[0] === '--version') {
+      return { status: 0, stdout: Buffer.from('11.1.1\n') };
+    }
+    if (command === 'pnpm' && args[0] === 'view' && args[1] === '@mfjjs/ruflo-setup') {
+      return { status: 0, stdout: Buffer.from('1.2.3\n') };
+    }
+    if (command === 'pnpm' && args[0] === 'list' && args[2] === '@mfjjs/ruflo-setup') {
+      return {
+        status: 0,
+        stdout: Buffer.from(JSON.stringify([{ dependencies: { '@mfjjs/ruflo-setup': { version: '1.2.3' } } }]))
+      };
+    }
+    throw new Error(`Unexpected command: ${command} ${args.join(' ')}`);
+  };
+
+  const { output } = await captureStdout(() => runUpdate({ dryRun: false, commandRunner }));
+  assert.match(output, /already up to date/);
+  assert.equal(
+    calls.some((c) => c.command === 'pnpm' && c.args[0] === 'add' && c.args[1] === '-g'),
+    false
+  );
+});
+
+test('runUpdate installs exact resolved version when @mfjjs/ruflo-setup is behind', async () => {
+  const calls = [];
+  const commandRunner = (command, args = [], options = {}) => {
+    calls.push({ command, args, options });
+    if (command === 'pnpm' && args[0] === '--version') {
+      return { status: 0, stdout: Buffer.from('11.1.1\n') };
+    }
+    if (command === 'pnpm' && args[0] === 'view' && args[1] === '@mfjjs/ruflo-setup') {
+      return { status: 0, stdout: Buffer.from('1.2.3\n') };
+    }
+    if (command === 'pnpm' && args[0] === 'list' && args[2] === '@mfjjs/ruflo-setup') {
+      return {
+        status: 0,
+        stdout: Buffer.from(JSON.stringify([{ dependencies: { '@mfjjs/ruflo-setup': { version: '1.2.2' } } }]))
+      };
+    }
+    if (command === 'pnpm' && args[0] === 'add' && args[1] === '-g') {
+      return { status: 0, stdout: Buffer.from('Packages: +1\n') };
+    }
+    throw new Error(`Unexpected command: ${command} ${args.join(' ')}`);
+  };
+
+  await captureStdout(() => runUpdate({ dryRun: false, commandRunner }));
+  assert.equal(
+    calls.some((c) => c.command === 'pnpm' && c.args.join(' ') === 'add -g @mfjjs/ruflo-setup@1.2.3'),
+    true
+  );
+});
+
+test('runPnpmInit skips ruflo add when installed version matches registry', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  const calls = [];
+  const prevRufloDev = process.env.RUFLO_DEV;
+  delete process.env.RUFLO_DEV;
+  const commandRunner = (command, args = [], options = {}) => {
+    calls.push({ command, args, options });
+    if (command === 'pnpm' && args[0] === '--version') {
+      return { status: 0, stdout: Buffer.from('11.1.1\n') };
+    }
+    if (command === 'pnpm' && args[0] === 'view' && args[1] === 'ruflo') {
+      return { status: 0, stdout: Buffer.from('2.0.0\n') };
+    }
+    if (command === 'pnpm' && args[0] === 'list' && args[2] === 'ruflo') {
+      return {
+        status: 0,
+        stdout: Buffer.from(JSON.stringify([{ dependencies: { ruflo: { version: '2.0.0' } } }]))
+      };
+    }
+    if (command === 'ruflo' && args[0] === 'memory' && args[1] === 'stats') {
+      return { status: 0, stdout: Buffer.from('Total Entries | 0\n') };
+    }
+    if (command === 'ruflo' && args[0] === 'init') {
+      return { status: 0, stdout: Buffer.from('') };
+    }
+    throw new Error(`Unexpected command: ${command} ${args.join(' ')}`);
+  };
+
+  try {
+    await captureStdout(() => runPnpmInit({ force: false, cwd: tempDir, dryRun: false, commandRunner }));
+    assert.equal(
+      calls.some((c) => c.command === 'pnpm' && c.args[0] === 'add' && c.args[2]?.startsWith('ruflo@')),
+      false
+    );
+  } finally {
+    if (typeof prevRufloDev === 'undefined') delete process.env.RUFLO_DEV;
+    else process.env.RUFLO_DEV = prevRufloDev;
+  }
+});
+
+test('runPnpmInit installs exact resolved ruflo version when behind', async () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ruflo-setup-test-'));
+  const calls = [];
+  const prevRufloDev = process.env.RUFLO_DEV;
+  delete process.env.RUFLO_DEV;
+  const commandRunner = (command, args = [], options = {}) => {
+    calls.push({ command, args, options });
+    if (command === 'pnpm' && args[0] === '--version') {
+      return { status: 0, stdout: Buffer.from('11.1.1\n') };
+    }
+    if (command === 'pnpm' && args[0] === 'view' && args[1] === 'ruflo') {
+      return { status: 0, stdout: Buffer.from('2.0.0\n') };
+    }
+    if (command === 'pnpm' && args[0] === 'list' && args[2] === 'ruflo') {
+      return {
+        status: 0,
+        stdout: Buffer.from(JSON.stringify([{ dependencies: { ruflo: { version: '1.9.0' } } }]))
+      };
+    }
+    if (command === 'pnpm' && args[0] === 'add' && args[1] === '-g' && args[2] === 'ruflo@2.0.0') {
+      return { status: 0, stdout: Buffer.from('Packages: +1\n') };
+    }
+    if (command === 'pnpm' && args[0] === 'approve-builds') {
+      return { status: 0, stdout: Buffer.from('') };
+    }
+    if (command === 'ruflo' && args[0] === 'memory' && args[1] === 'stats') {
+      return { status: 0, stdout: Buffer.from('Total Entries | 0\n') };
+    }
+    if (command === 'ruflo' && args[0] === 'init') {
+      return { status: 0, stdout: Buffer.from('') };
+    }
+    throw new Error(`Unexpected command: ${command} ${args.join(' ')}`);
+  };
+
+  try {
+    await captureStdout(() => runPnpmInit({ force: false, cwd: tempDir, dryRun: false, commandRunner }));
+    assert.equal(
+      calls.some((c) => c.command === 'pnpm' && c.args.join(' ') === 'add -g ruflo@2.0.0'),
+      true
+    );
+    assert.equal(
+      calls.some((c) => c.command === 'pnpm' && c.args[0] === 'approve-builds'),
+      true
+    );
+  } finally {
+    if (typeof prevRufloDev === 'undefined') delete process.env.RUFLO_DEV;
+    else process.env.RUFLO_DEV = prevRufloDev;
+  }
 });
