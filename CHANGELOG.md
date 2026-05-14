@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.2.20](///compare/v0.2.19...v0.2.20) (2026-05-14)
+
+
+### Features
+
+* enhance update functionality to check and install exact resolved version of @mfjjs/ruflo-setup or ruflo ea1ac5e
+
 ### [0.2.19](///compare/v0.2.18...v0.2.19) (2026-05-13)
 
 
