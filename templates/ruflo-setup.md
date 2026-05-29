@@ -68,11 +68,6 @@ When the user runs /ruflo-setup:
    pnpm add -g @mfjjs/ruflo-setup
    pnpm add -g ruflo@latest 2>&1 | tee /tmp/ruflo-pnpm-add.log
    ```
-   After the `pnpm add -g ruflo@latest` step, inspect the output. If pnpm installed or updated any packages (i.e. the output does NOT contain "Already up to date" or an equivalent no-change message), run:
-   ```bash
-   pnpm approve-builds -g --all
-   ```
-   Skip `approve-builds` if nothing changed.
 5. Run the setup tool:
    ```bash
    ruflo-setup

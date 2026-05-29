@@ -167,7 +167,6 @@ export function runPnpmInit({ force, cwd, dryRun, commandRunner = spawnSync }) {
       logLine(`  [DRY RUN] If installed version is missing or older: pnpm add -g ruflo@<resolved-latest-version>`);
       logLine(`  [DRY RUN] If installed version equals registry latest: no changes`);
     }
-    logLine(`  [DRY RUN] Would run: pnpm approve-builds -g --all  (if changes detected)`);
     logLine(`  [DRY RUN] Would check: ruflo memory stats (Total Entries)`);
     logLine(`  [DRY RUN] First time (entries=0): ruflo ${[...initArgs, '--start-all'].join(' ')}`);
     logLine(`  [DRY RUN] Returning (entries>0): ruflo ${initArgs.join(' ')} + daemon restart + swarm init`);
@@ -175,8 +174,6 @@ export function runPnpmInit({ force, cwd, dryRun, commandRunner = spawnSync }) {
   }
 
   ensurePnpmAvailable(commandRunner);
-
-  let somethingChanged = false;
 
   if (process.env.RUFLO_DEV) {
     logLine('  RUFLO_DEV is set — skipping pnpm add -g ruflo@latest (using local copy).');
@@ -207,21 +204,8 @@ export function runPnpmInit({ force, cwd, dryRun, commandRunner = spawnSync }) {
         throw new Error(`pnpm add -g ruflo@${registryVer} failed with exit code ${install.status}`);
       }
 
-      somethingChanged = true;
     }
   } // end RUFLO_DEV else
-
-  if (somethingChanged) {
-    logLine('  Changes detected — running pnpm approve-builds -g --all ...');
-    const approve = commandRunner('pnpm', ['approve-builds', '-g', '--all'], {
-      cwd,
-      stdio: 'inherit',
-      shell: process.platform === 'win32'
-    });
-    if (approve.status !== 0) {
-      throw new Error(`pnpm approve-builds -g --all failed with exit code ${approve.status}`);
-    }
-  }
 
   const firstTime = !isMemoryInitialized(cwd, commandRunner);
   if (firstTime) {

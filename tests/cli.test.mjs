@@ -446,9 +446,6 @@ test('runPnpmInit installs exact resolved ruflo version when behind', async () =
     if (command === 'pnpm' && args[0] === 'add' && args[1] === '-g' && args[2] === 'ruflo@2.0.0') {
       return { status: 0, stdout: Buffer.from('Packages: +1\n') };
     }
-    if (command === 'pnpm' && args[0] === 'approve-builds') {
-      return { status: 0, stdout: Buffer.from('') };
-    }
     if (command === 'ruflo' && args[0] === 'memory' && args[1] === 'stats') {
       return { status: 0, stdout: Buffer.from('Total Entries | 0\n') };
     }
@@ -462,10 +459,6 @@ test('runPnpmInit installs exact resolved ruflo version when behind', async () =
     await captureStdout(() => runPnpmInit({ force: false, cwd: tempDir, dryRun: false, commandRunner }));
     assert.equal(
       calls.some((c) => c.command === 'pnpm' && c.args.join(' ') === 'add -g ruflo@2.0.0'),
-      true
-    );
-    assert.equal(
-      calls.some((c) => c.command === 'pnpm' && c.args[0] === 'approve-builds'),
       true
     );
   } finally {
